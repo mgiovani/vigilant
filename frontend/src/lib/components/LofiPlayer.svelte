@@ -2,54 +2,26 @@
   import { onMount } from 'svelte';
   import { AlertTriangle } from 'lucide-svelte';
 
-  let videoId = 'jfKfPfyJRdk';
+  let embedUrl = '';
   let error = '';
   let loading = true;
 
   onMount(async () => {
     try {
-      // Get lofi video ID from backend
-      const id = await window.go.main.VanillaApp.GetLofiVideoID();
-      if (id) {
-        videoId = id;
+      // Get embed URL from backend (uses HTTP localhost proxy to fix Error 153)
+      const url = await window.go.main.VanillaApp.GetLofiEmbedURL();
+      if (url) {
+        embedUrl = url;
       }
-      console.log('Loaded video ID from backend:', videoId);
+      console.log('Loaded embed URL from backend:', embedUrl);
       loading = false;
     } catch (e) {
-      console.warn('Failed to get video ID from backend, using fallback:', e);
+      console.warn('Failed to get embed URL from backend:', e);
+      // Fallback to direct YouTube URL (works in browser, not in native app)
+      embedUrl = 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1';
       loading = false;
     }
   });
-
-  // HTML proxy with proper referrer headers - fixes YouTube Error 153 in WKWebView
-  $: proxyHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="referrer" content="strict-origin-when-cross-origin">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; }
-        iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-          display: block;
-        }
-      </style>
-    </head>
-    <body>
-      <iframe
-        src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-    </body>
-    </html>
-  `;
 
 </script>
 
@@ -76,11 +48,11 @@
     </div>
   {:else}
     <iframe
-      srcdoc={proxyHTML}
+      src={embedUrl}
       title="Lofi Hip Hop Radio"
       class="w-full flex-1"
       allowfullscreen
-      sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation allow-top-navigation-by-user-activation"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     />
   {/if}
 </div>

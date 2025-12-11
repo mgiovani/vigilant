@@ -21,17 +21,19 @@ var assets embed.FS
 
 // VanillaApp wraps the orchestrator app for Wails bindings
 type VanillaApp struct {
-	orchestrator *appruntime.App
+	orchestrator   *appruntime.App
 	youtubeService *youtube.Service
-	configPath string
+	embedProxy     *youtube.EmbedProxy
+	configPath     string
 }
 
 // NewVanillaApp creates a new Wails-compatible app wrapper
-func NewVanillaApp(orchestrator *appruntime.App, youtubeService *youtube.Service, configPath string) *VanillaApp {
+func NewVanillaApp(orchestrator *appruntime.App, youtubeService *youtube.Service, embedProxy *youtube.EmbedProxy, configPath string) *VanillaApp {
 	return &VanillaApp{
-		orchestrator: orchestrator,
+		orchestrator:   orchestrator,
 		youtubeService: youtubeService,
-		configPath: configPath,
+		embedProxy:     embedProxy,
+		configPath:     configPath,
 	}
 }
 
@@ -92,6 +94,17 @@ func (a *VanillaApp) GetLofiVideoID() string {
 		return "jfKfPfyJRdk" // Fallback to hardcoded ID
 	}
 	return videoID
+}
+
+// GetLofiEmbedURL returns the HTTP localhost URL for the YouTube embed proxy
+// This provides a proper http:// origin that YouTube accepts (fixes Error 153)
+func (a *VanillaApp) GetLofiEmbedURL() string {
+	videoID := a.GetLofiVideoID()
+	if a.embedProxy != nil {
+		return a.embedProxy.GetEmbedURL(videoID)
+	}
+	// Fallback to direct YouTube embed (won't work in native app but works in browser)
+	return "https://www.youtube-nocookie.com/embed/" + videoID + "?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1"
 }
 
 // GetBlocklist returns the current blocklist configuration
@@ -181,6 +194,13 @@ func main() {
 		}
 	}
 
+	// Start embed proxy server for YouTube (provides HTTP localhost origin)
+	// This fixes Error 153 by giving YouTube a proper http:// referrer
+	embedProxy := youtube.NewEmbedProxy()
+	if err := embedProxy.Start(); err != nil {
+		log.Printf("Warning: Failed to start embed proxy: %v", err)
+	}
+
 	// Load configuration
 	orchestrator, err := appruntime.New("")
 	if err != nil {
@@ -188,7 +208,7 @@ func main() {
 	}
 
 	// Create Wails-compatible wrapper
-	app := NewVanillaApp(orchestrator, youtubeService, "")
+	app := NewVanillaApp(orchestrator, youtubeService, embedProxy, "")
 
 	// Create application with options
 	err = wails.Run(&options.App{
@@ -215,6 +235,12 @@ func main() {
 			// Gracefully shutdown the orchestrator
 			if err := orchestrator.Stop(); err != nil {
 				log.Printf("Error stopping orchestrator: %v", err)
+			}
+			// Stop the embed proxy server
+			if embedProxy != nil {
+				if err := embedProxy.Stop(); err != nil {
+					log.Printf("Error stopping embed proxy: %v", err)
+				}
 			}
 		},
 		Bind: []interface{}{
