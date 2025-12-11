@@ -6,6 +6,8 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"os/exec"
+	"strings"
 	"sync"
 	"time"
 	"unsafe"
@@ -194,13 +196,14 @@ func (m *DarwinMonitor) getActiveWindowInternal() (*WindowInfo, error) {
 	if nameStr == nil {
 		return nil, fmt.Errorf("could not get application name")
 	}
-	name := C.GoString(nameStr)
+	appName := C.GoString(nameStr)
 
-	// Get bundle identifier for process name
+	// Get bundle identifier for process name and browser detection
 	bundleStr := C.getBundleIdentifier(appPtr)
+	bundleID := ""
 	processName := ""
 	if bundleStr != nil {
-		bundleID := C.GoString(bundleStr)
+		bundleID = C.GoString(bundleStr)
 		// Extract just the last component of the bundle identifier
 		// e.g., com.google.Chrome -> Chrome
 		if bundleID != "" {
@@ -211,14 +214,23 @@ func (m *DarwinMonitor) getActiveWindowInternal() (*WindowInfo, error) {
 		}
 	}
 
-	// Fallback to name if we don't have a process name
+	// Fallback to app name if we don't have a process name
 	if processName == "" {
-		processName = name
+		processName = appName
+	}
+
+	// For browsers, get the actual tab title via AppleScript
+	// This allows detecting YouTube and other blocked websites
+	windowTitle := appName
+	if bundleID != "" {
+		if tabTitle := getBrowserTabTitle(bundleID); tabTitle != "" {
+			windowTitle = tabTitle
+		}
 	}
 
 	return &WindowInfo{
 		PID:       uint32(pid),
-		Title:     name,
+		Title:     windowTitle,
 		Process:   processName,
 		Handle:    uintptr(pid), // On macOS, use PID as the handle
 		Timestamp: time.Now(),
@@ -249,6 +261,54 @@ func extractBundleComponent(bundleID string) string {
 	return bundleID[lastDot+1:]
 }
 
+// browserBundleToAppName maps bundle identifiers to AppleScript application names
+var browserBundleToAppName = map[string]string{
+	"com.google.Chrome":            "Google Chrome",
+	"com.apple.Safari":             "Safari",
+	"org.mozilla.firefox":          "Firefox",
+	"com.microsoft.edgemac":        "Microsoft Edge",
+	"com.brave.Browser":            "Brave Browser",
+	"com.operasoftware.Opera":      "Opera",
+	"com.vivaldi.Vivaldi":          "Vivaldi",
+	"company.thebrowser.Browser":   "Arc",
+	"org.chromium.Chromium":        "Chromium",
+}
+
+// getBrowserTabTitle uses AppleScript to get the active tab title from a browser.
+// Returns empty string if the app is not a supported browser or if the query fails.
+func getBrowserTabTitle(bundleID string) string {
+	appName, isBrowser := browserBundleToAppName[bundleID]
+	if !isBrowser {
+		return ""
+	}
+
+	// Build the AppleScript command based on browser type
+	var script string
+	switch bundleID {
+	case "com.apple.Safari":
+		// Safari uses different AppleScript syntax
+		script = fmt.Sprintf(`tell application "%s" to get name of front document`, appName)
+	default:
+		// Chrome-based browsers (Chrome, Edge, Brave, Opera, Vivaldi, Arc, Chromium)
+		// and Firefox all support: get title of active tab of front window
+		script = fmt.Sprintf(`tell application "%s" to get title of active tab of front window`, appName)
+	}
+
+	// Execute AppleScript with a reasonable timeout
+	// 500ms is enough for most cases while not blocking the polling loop too much
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "osascript", "-e", script)
+	output, err := cmd.Output()
+	if err != nil {
+		// Browser might not be running or no windows open - this is normal
+		return ""
+	}
+
+	return strings.TrimSpace(string(output))
+}
+
 // windowChanged detects if the window has actually changed.
 func (m *DarwinMonitor) windowChanged(prev, current *WindowInfo) bool {
 	if prev == nil && current != nil {
@@ -263,6 +323,8 @@ func (m *DarwinMonitor) windowChanged(prev, current *WindowInfo) bool {
 		return false
 	}
 
-	// Compare by process ID and name to detect real changes
-	return prev.PID != current.PID || prev.Process != current.Process
+	// Compare by process ID, name, AND title to detect real changes
+	// Title comparison is critical for detecting browser tab switches
+	// (same PID/process but different tab = different content)
+	return prev.PID != current.PID || prev.Process != current.Process || prev.Title != current.Title
 }
