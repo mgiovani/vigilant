@@ -53,18 +53,25 @@ export function initializeEventListeners() {
   }) => {
     console.log('[stores] stats:update received:', data);
 
-    // Parse duration strings (e.g., "1h2m3s" or "5m30s" or "45s") to milliseconds
+    // Parse duration strings (e.g., "1h2m3s" or "5m30s" or "45s" or "500ms") to milliseconds
     const parseDuration = (duration: string): number => {
-      // Handle Go duration format like "1h2m3.456s" or "5m30s" or "45s" or "0s"
+      // Handle Go duration format like "1h2m3.456s" or "5m30s" or "45s" or "500ms" or "1µs"
       let ms = 0;
 
       const hourMatch = duration.match(/(\d+)h/);
-      const minMatch = duration.match(/(\d+)m/);
-      const secMatch = duration.match(/([\d.]+)s/);
+      // Use negative lookahead to avoid matching 'm' in 'ms' (milliseconds)
+      const minMatch = duration.match(/(\d+)m(?![sµn])/);
+      const secMatch = duration.match(/([\d.]+)s$/);
+      const msMatch = duration.match(/([\d.]+)ms/);
+      const usMatch = duration.match(/([\d.]+)µs/);
+      const nsMatch = duration.match(/([\d.]+)ns/);
 
       if (hourMatch) ms += parseInt(hourMatch[1]) * 3600000;
       if (minMatch) ms += parseInt(minMatch[1]) * 60000;
       if (secMatch) ms += parseFloat(secMatch[1]) * 1000;
+      if (msMatch) ms += parseFloat(msMatch[1]);
+      if (usMatch) ms += parseFloat(usMatch[1]) / 1000;
+      if (nsMatch) ms += parseFloat(nsMatch[1]) / 1000000;
 
       return ms;
     };
