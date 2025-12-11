@@ -46,8 +46,9 @@ func LoadConfig(path string) (*Config, error) {
 		}
 	}
 
-	// Return error if no config found
-	return nil, fmt.Errorf("no configuration file found. tried %s, ~/.vigilant/config.yaml and bundled config/default.yaml", path)
+	// Fall back to built-in defaults (no config file needed)
+	defaultCfg := DefaultConfig()
+	return &defaultCfg, nil
 }
 
 // loadFromPath attempts to load and parse config from a specific file path
