@@ -10,7 +10,6 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"unicode/utf16"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -193,14 +192,14 @@ func (m *WindowsMonitor) getWindowTitle(hwnd syscall.Handle) string {
 	const maxLen = 512
 	buf := make([]uint16, maxLen)
 
-	len, _, _ := procGetWindowTextW.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&buf[0])), uintptr(maxLen))
+	n, _, _ := procGetWindowTextW.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&buf[0])), uintptr(maxLen))
 
-	if len == 0 {
+	if n == 0 {
 		return ""
 	}
 
 	// Convert UTF-16 to string
-	return windows.UTF16ToString(buf[:len])
+	return windows.UTF16ToString(buf[:n])
 }
 
 // getProcessName extracts the executable name from a process ID.
@@ -214,28 +213,30 @@ func (m *WindowsMonitor) getProcessName(pid uint32) (string, error) {
 
 	// Get process image file name
 	buf := make([]uint16, MAX_PATH)
-	len, _, err := procQueryFullProcessImageNameW.Call(
+	bufSize := uint32(MAX_PATH)
+	ret, _, err := procQueryFullProcessImageNameW.Call(
 		handle,
 		uintptr(0), // lpExeName: NULL means standard name
 		uintptr(unsafe.Pointer(&buf[0])),
-		uintptr(unsafe.Pointer(&len)),
+		uintptr(unsafe.Pointer(&bufSize)),
 	)
 
-	if len == 0 && handle != 0 {
+	if ret == 0 && handle != 0 {
 		// Fallback method: try GetProcessImageFileNameW
 		buf = make([]uint16, MAX_PATH)
-		len, _, _ = procGetProcessImageFileNameW.Call(handle, uintptr(unsafe.Pointer(&buf[0])), uintptr(len))
-		if len == 0 {
+		ret, _, _ = procGetProcessImageFileNameW.Call(handle, uintptr(unsafe.Pointer(&buf[0])), uintptr(MAX_PATH))
+		if ret == 0 {
 			return "", fmt.Errorf("failed to get process image file name")
 		}
+		bufSize = uint32(ret)
 	}
 
-	if len == 0 {
+	if bufSize == 0 {
 		return "", fmt.Errorf("failed to query full process image name: %w", err)
 	}
 
 	// Convert UTF-16 to string
-	fullPath := windows.UTF16ToString(buf[:len])
+	fullPath := windows.UTF16ToString(buf[:bufSize])
 
 	// Extract just the executable name from the full path
 	parts := strings.Split(fullPath, "\\")
