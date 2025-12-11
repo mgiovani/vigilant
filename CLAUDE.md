@@ -283,8 +283,8 @@ A: Add struct field to Config, add YAML tag, update default.yaml, add validation
 
 ## Contact
 
-- GitHub: https://github.com/vigilant-app/vigilant
-- Issues: https://github.com/vigilant-app/vigilant/issues
+- GitHub: https://github.com/mgiovani/vigilant
+- Issues: https://github.com/mgiovani/vigilant/issues
 
 ---
 

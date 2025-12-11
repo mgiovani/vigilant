@@ -30,7 +30,7 @@ A cross-platform desktop application that helps developers, students, and conten
 
 ### Quick Start
 
-1. **Download** the latest release from [Releases Page](https://github.com/vigilant-app/vigilant/releases)
+1. **Download** the latest release from [Releases Page](https://github.com/mgiovani/vigilant/releases)
 2. **macOS**:
    - Download `vigilant-darwin-universal` (works on Intel and Apple Silicon)
    - Make executable: `chmod +x vigilant-darwin-universal`
@@ -52,7 +52,7 @@ A cross-platform desktop application that helps developers, students, and conten
 **Steps**:
 ```bash
 # Clone repository
-git clone https://github.com/vigilant-app/vigilant.git
+git clone https://github.com/mgiovani/vigilant.git
 cd vigilant
 
 # Install dependencies
@@ -189,8 +189,8 @@ A: Not yet. Linux support is planned for Phase 2.
 
 ### Getting Help
 
-- **GitHub Issues**: https://github.com/vigilant-app/vigilant/issues
-- **Discussions**: https://github.com/vigilant-app/vigilant/discussions
+- **GitHub Issues**: https://github.com/mgiovani/vigilant/issues
+- **Discussions**: https://github.com/mgiovani/vigilant/discussions
 
 ## Development
 
@@ -354,9 +354,7 @@ Contributions welcome! Please:
 
 ## Contact
 
-- GitHub: [@vigilant-app](https://github.com/vigilant-app/vigilant)
-- Twitter: [@vigilant_app](https://twitter.com/vigilant_app)
-- Email: hello@vigilant.dev
+- GitHub: [@mgiovani](https://github.com/mgiovani/vigilant)
 
 ---
 
