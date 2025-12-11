@@ -9,8 +9,9 @@ export default {
           800: '#2a2a2a',
         },
         accent: {
-          DEFAULT: '#a855f7',
-          hover: '#9333ea',
+          DEFAULT: '#ffffff',
+          hover: '#e5e5e5',
+          400: '#a3a3a3',
         },
       },
     },
