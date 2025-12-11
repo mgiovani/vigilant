@@ -11,7 +11,7 @@ help:
 	@echo "  make build-windows            Build Windows executable (amd64)"
 	@echo "  make build-darwin             Build macOS executable (amd64)"
 	@echo "  make build-darwin-universal   Build macOS universal executable (amd64 + arm64)"
-	@echo "  make install                  Build and install app (macOS: copy to /Applications)"
+	@echo "  make install                  Build and install app (macOS/Windows)"
 	@echo "  make clean                    Remove build artifacts"
 	@echo "  make test                     Run Go tests"
 	@echo "  make help                     Show this help message"
@@ -32,15 +32,24 @@ else
 	wails build -platform windows/amd64
 endif
 
-# Install app to system (macOS only for now)
+# Install app to system
 install: build
 ifeq ($(UNAME_S),Darwin)
-	@echo "Installing Vigilant.app to /Applications..."
-	@rm -rf /Applications/Vigilant.app
-	@cp -r build/bin/Vigilant.app /Applications/
-	@echo "✓ Vigilant installed to /Applications/Vigilant.app"
+	@echo "Installing vigilant.app to /Applications..."
+	@rm -rf /Applications/vigilant.app
+	@cp -r build/bin/vigilant.app /Applications/
+	@xattr -cr /Applications/vigilant.app
+	@echo "✓ Vigilant installed to /Applications/vigilant.app"
+else ifeq ($(OS),Windows_NT)
+	@echo "Installing Vigilant to Program Files..."
+	@if not exist "C:\Program Files\Vigilant" mkdir "C:\Program Files\Vigilant"
+	@copy /Y "build\bin\vigilant.exe" "C:\Program Files\Vigilant\vigilant.exe"
+	@echo "Creating Start Menu shortcut..."
+	@powershell -Command "$$WshShell = New-Object -ComObject WScript.Shell; $$Shortcut = $$WshShell.CreateShortcut(\"$$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Vigilant.lnk\"); $$Shortcut.TargetPath = 'C:\Program Files\Vigilant\vigilant.exe'; $$Shortcut.Save()"
+	@echo "✓ Vigilant installed to C:\Program Files\Vigilant\"
+	@echo "✓ Start Menu shortcut created"
 else
-	@echo "Install command currently only supported on macOS"
+	@echo "Install command currently only supported on macOS and Windows"
 endif
 
 build-windows:
