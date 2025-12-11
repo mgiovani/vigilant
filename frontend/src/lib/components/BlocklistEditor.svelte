@@ -1,17 +1,15 @@
 <script>
   import { onMount } from 'svelte';
-  import { Plus, Trash2, AlertCircle } from 'lucide-svelte';
+  import { Plus, Trash2 } from 'lucide-svelte';
 
   let blocklist = {
-    processes: [],
-    websites: [],
-    patterns: []
+    patterns: [],
+    exceptions: []
   };
 
   let newEntry = {
-    processes: '',
-    websites: '',
-    patterns: ''
+    patterns: '',
+    exceptions: ''
   };
 
   let loading = true;
@@ -62,105 +60,20 @@
 
 <div class="space-y-8">
   {#if error}
-    <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex gap-3">
-      <AlertCircle size={20} class="text-red-400 flex-shrink-0 mt-0.5" />
-      <div>
-        <p class="text-sm text-red-300">{error}</p>
-      </div>
+    <div class="bg-red-500/20 backdrop-blur-sm border border-red-500/30 rounded-xl p-4 mb-6">
+      <p class="text-red-400 text-sm">{error}</p>
     </div>
   {/if}
 
   {#if loading}
     <div class="text-center py-8">
-      <p class="text-gray-500">Loading blocklist...</p>
+      <p class="text-white/30">Loading blocklist...</p>
     </div>
   {:else}
-    <!-- Processes Section -->
+    <!-- Block Patterns Section -->
     <div>
-      <h3 class="text-sm font-semibold text-white mb-4">Blocked Processes</h3>
-      <div class="space-y-3">
-        <!-- Input -->
-        <div class="flex gap-2">
-          <input
-            type="text"
-            bind:value={newEntry.processes}
-            on:keydown={(e) => handleKeydown(e, 'processes')}
-            placeholder="e.g., Discord.exe, Slack"
-            class="flex-1 bg-dark-800 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent transition-colors"
-          />
-          <button
-            on:click={() => addEntry('processes')}
-            disabled={!newEntry.processes.trim()}
-            class="p-2 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
-            title="Add process"
-          >
-            <Plus size={18} />
-          </button>
-        </div>
-
-        <!-- List -->
-        <div class="space-y-2">
-          {#each blocklist.processes || [] as process (process)}
-            <div class="flex items-center justify-between bg-dark-800 rounded-lg p-3">
-              <span class="text-sm text-gray-300">{process}</span>
-              <button
-                on:click={() => removeEntry('processes', process)}
-                class="p-1.5 hover:bg-dark-700 rounded text-gray-500 hover:text-red-400 transition-colors"
-                title="Remove"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          {/each}
-        </div>
-      </div>
-    </div>
-
-    <!-- Websites Section -->
-    <div>
-      <h3 class="text-sm font-semibold text-white mb-4">Blocked Websites</h3>
-      <div class="space-y-3">
-        <!-- Input -->
-        <div class="flex gap-2">
-          <input
-            type="text"
-            bind:value={newEntry.websites}
-            on:keydown={(e) => handleKeydown(e, 'websites')}
-            placeholder="e.g., youtube.com, twitter.com"
-            class="flex-1 bg-dark-800 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent transition-colors"
-          />
-          <button
-            on:click={() => addEntry('websites')}
-            disabled={!newEntry.websites.trim()}
-            class="p-2 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
-            title="Add website"
-          >
-            <Plus size={18} />
-          </button>
-        </div>
-
-        <!-- List -->
-        <div class="space-y-2">
-          {#each blocklist.websites || [] as website (website)}
-            <div class="flex items-center justify-between bg-dark-800 rounded-lg p-3">
-              <span class="text-sm text-gray-300">{website}</span>
-              <button
-                on:click={() => removeEntry('websites', website)}
-                class="p-1.5 hover:bg-dark-700 rounded text-gray-500 hover:text-red-400 transition-colors"
-                title="Remove"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          {/each}
-        </div>
-      </div>
-    </div>
-
-    <!-- Patterns Section -->
-    <div>
-      <h3 class="text-sm font-semibold text-white mb-4">Regex Patterns</h3>
-      <p class="text-xs text-gray-500 mb-3">Regex patterns for advanced blocking (case-insensitive)</p>
+      <h3 class="text-sm font-semibold text-white/90 mb-2">Block Patterns</h3>
+      <p class="text-xs text-white/40 mb-4">Apps and websites to block (matches window title or process name)</p>
       <div class="space-y-3">
         <!-- Input -->
         <div class="flex gap-2">
@@ -168,33 +81,81 @@
             type="text"
             bind:value={newEntry.patterns}
             on:keydown={(e) => handleKeydown(e, 'patterns')}
-            placeholder="e.g., .*Netflix.*, .*Prime Video.*"
-            class="flex-1 bg-dark-800 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent transition-colors"
+            placeholder="e.g., discord, youtube, netflix, slack"
+            class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
           />
           <button
             on:click={() => addEntry('patterns')}
             disabled={!newEntry.patterns.trim()}
-            class="p-2 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+            class="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             title="Add pattern"
           >
-            <Plus size={18} />
+            <Plus size={18} class="text-white" />
           </button>
         </div>
 
         <!-- List -->
-        <div class="space-y-2">
+        <div class="space-y-2 max-h-64 overflow-y-auto">
           {#each blocklist.patterns || [] as pattern (pattern)}
-            <div class="flex items-center justify-between bg-dark-800 rounded-lg p-3">
-              <span class="text-sm text-gray-300 font-mono">{pattern}</span>
+            <div class="bg-white/5 rounded-lg p-3 flex items-center justify-between group hover:bg-white/10 transition-all">
+              <span class="text-sm text-white/80 font-mono">{pattern}</span>
               <button
                 on:click={() => removeEntry('patterns', pattern)}
-                class="p-1.5 hover:bg-dark-700 rounded text-gray-500 hover:text-red-400 transition-colors"
+                class="p-1.5 rounded hover:bg-white/10 text-white/40 hover:text-red-400 transition-colors"
                 title="Remove"
               >
                 <Trash2 size={16} />
               </button>
             </div>
           {/each}
+          {#if !blocklist.patterns?.length}
+            <p class="text-white/30 text-sm text-center py-4">No block patterns configured</p>
+          {/if}
+        </div>
+      </div>
+    </div>
+
+    <!-- Exceptions Section -->
+    <div>
+      <h3 class="text-sm font-semibold text-white/90 mb-2">Exceptions</h3>
+      <p class="text-xs text-white/40 mb-4">Patterns that bypass blocking (e.g., "youtube music" allows music while blocking YouTube)</p>
+      <div class="space-y-3">
+        <!-- Input -->
+        <div class="flex gap-2">
+          <input
+            type="text"
+            bind:value={newEntry.exceptions}
+            on:keydown={(e) => handleKeydown(e, 'exceptions')}
+            placeholder="e.g., youtube music, youtube studio"
+            class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
+          />
+          <button
+            on:click={() => addEntry('exceptions')}
+            disabled={!newEntry.exceptions.trim()}
+            class="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Add exception"
+          >
+            <Plus size={18} class="text-white" />
+          </button>
+        </div>
+
+        <!-- List -->
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          {#each blocklist.exceptions || [] as exception (exception)}
+            <div class="bg-white/5 rounded-lg p-3 flex items-center justify-between group hover:bg-white/10 transition-all">
+              <span class="text-sm text-white/80 font-mono">{exception}</span>
+              <button
+                on:click={() => removeEntry('exceptions', exception)}
+                class="p-1.5 rounded hover:bg-white/10 text-white/40 hover:text-red-400 transition-colors"
+                title="Remove"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          {/each}
+          {#if !blocklist.exceptions?.length}
+            <p class="text-white/30 text-sm text-center py-4">No exceptions configured</p>
+          {/if}
         </div>
       </div>
     </div>

@@ -70,22 +70,22 @@
 <div class="player-container bg-black">
   {#if error}
     <div class="flex items-center justify-center h-full">
-      <div class="text-center">
-        <div class="p-4 rounded-full bg-rose-500/10 inline-block mb-4">
-          <AlertTriangle size={32} class="text-rose-400" />
+      <div class="text-center bg-black/40 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
+        <div class="p-4 rounded-full bg-red-500/20 inline-block mb-4">
+          <AlertTriangle size={32} class="text-red-400" />
         </div>
-        <p class="text-xl font-bold text-rose-400 mb-2">Player Error</p>
-        <p class="text-sm text-gray-400">{error}</p>
-        <p class="text-xs text-gray-500 mt-4">YouTube API may be unavailable</p>
+        <p class="text-xl font-bold text-white mb-2">Player Error</p>
+        <p class="text-sm text-white/60">{error}</p>
+        <p class="text-xs text-white/40 mt-4">YouTube API may be unavailable</p>
       </div>
     </div>
   {:else if loading}
     <div class="loading-container" style="background-image: url({lofiBackground})">
-      <div class="loading-overlay">
+      <div class="loading-overlay bg-black/60 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
         <div class="inline-block relative w-12 h-12 mb-4">
-          <div class="animate-spin rounded-full border-2 border-gray-700 border-t-accent h-full w-full" />
+          <div class="animate-spin rounded-full border-2 border-white/20 border-t-white h-full w-full" />
         </div>
-        <p class="text-sm text-gray-300">Finding lofi stream...</p>
+        <p class="text-sm text-white/70">Finding lofi stream...</p>
       </div>
     </div>
   {:else}
@@ -123,10 +123,6 @@
 
   .loading-overlay {
     text-align: center;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 1rem;
-    backdrop-filter: blur(4px);
   }
 
   .player-iframe {

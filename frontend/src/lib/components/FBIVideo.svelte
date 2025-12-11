@@ -41,13 +41,13 @@
 
 <div class="player-container bg-black">
   {#if error}
-    <div class="flex items-center justify-center h-full bg-dark-950">
-      <div class="text-center">
-        <div class="p-4 rounded-full bg-rose-500/10 inline-block mb-4">
-          <AlertTriangle size={48} class="text-rose-400" />
+    <div class="flex items-center justify-center h-full">
+      <div class="text-center bg-black/40 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
+        <div class="p-4 rounded-full bg-red-500/20 inline-block mb-4">
+          <AlertTriangle size={48} class="text-red-400" />
         </div>
-        <p class="text-xl font-bold text-rose-400">FBI ALERT</p>
-        <p class="text-sm text-gray-500 mt-4">{error}</p>
+        <p class="text-xl font-bold text-white">FBI ALERT</p>
+        <p class="text-sm text-white/40 mt-4">{error}</p>
       </div>
     </div>
   {:else}
@@ -64,17 +64,16 @@
       Your browser does not support the video tag.
     </video>
 
-    <!-- Mute Button - Positioned top-right, minimal style -->
+    <!-- Mute Button - Positioned top-right, glass style -->
     <button
       on:click={toggleMute}
-      class="absolute top-4 right-4 p-2.5 bg-accent hover:bg-accent-hover rounded-xl text-white font-semibold transition-all duration-200 z-10 flex items-center gap-2"
+      class="absolute top-4 right-4 z-10 p-3 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10 text-white/70 hover:text-white hover:bg-black/60 transition-all"
+      title={effectiveMuted ? 'Unmute' : 'Mute'}
     >
-      {#if userMuted}
-        <VolumeX size={18} />
-        <span class="text-sm">Unmute</span>
+      {#if effectiveMuted}
+        <VolumeX size={20} />
       {:else}
-        <Volume2 size={18} />
-        <span class="text-sm">Mute</span>
+        <Volume2 size={20} />
       {/if}
     </button>
   {/if}

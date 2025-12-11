@@ -5,7 +5,7 @@
   import FBIVideo from './lib/components/FBIVideo.svelte';
   import StatsDisplay from './lib/components/StatsDisplay.svelte';
   import SettingsPanel from './lib/components/SettingsPanel.svelte';
-  import { CheckCircle, AlertTriangle, Settings } from 'lucide-svelte';
+  import { Settings } from 'lucide-svelte';
 
   let currentPlayerState = 'lofi';
   let currentFocusState = 'working';
@@ -30,44 +30,34 @@
       focusUnsubscribe();
     };
   });
-
-  $: statusConfig = currentFocusState === 'working'
-    ? { text: 'Working', dotColor: 'bg-accent' }
-    : { text: 'Distracted', dotColor: 'bg-gray-500' };
 </script>
 
-<main class="flex h-screen bg-black text-gray-100 overflow-hidden">
-  <!-- Player Panel - Both players stay mounted, visibility toggled -->
-  <div class="flex-1 flex flex-col relative">
+<main class="relative h-screen w-screen bg-black overflow-hidden">
+  <!-- Full-screen video background - Both players stay mounted, visibility toggled -->
+  <div class="absolute inset-0">
     <div class="absolute inset-0" class:hidden={currentPlayerState !== 'lofi'}>
       <LofiPlayer />
     </div>
     <div class="absolute inset-0" class:hidden={currentPlayerState === 'lofi'}>
       <FBIVideo muted={currentPlayerState === 'lofi'} />
     </div>
+  </div>
 
-    <!-- Status Indicator Overlay -->
-    <div class="absolute top-4 left-4 z-40">
-      <div class="px-3 py-1.5 rounded-lg bg-dark-900/90 backdrop-blur-sm border border-gray-800 flex items-center gap-2 transition-all duration-300">
-        <div class="w-2 h-2 rounded-full {statusConfig.dotColor}"></div>
-        <span class="text-xs font-medium text-white">{statusConfig.text}</span>
-      </div>
-    </div>
-
-    <!-- Settings Button -->
+  <!-- Header Bar - dark gradient -->
+  <header class="absolute top-0 left-0 right-0 z-30 h-14 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm flex items-center justify-end px-6">
     <button
       on:click={() => (settingsPanelOpen = true)}
-      class="absolute top-4 right-4 z-40 p-2 rounded-lg bg-dark-900/90 backdrop-blur-sm border border-gray-800 text-gray-400 hover:text-white hover:border-accent transition-all duration-200"
+      class="p-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white/70 hover:text-white transition-all duration-200"
       title="Open settings"
     >
       <Settings size={20} />
     </button>
-  </div>
+  </header>
 
-  <!-- Stats Sidebar -->
-  <aside class="w-80 bg-dark-900 border-l border-gray-800 p-6 overflow-y-auto">
+  <!-- Stats Glass Panel - bottom overlay (raised to avoid YouTube controls) -->
+  <div class="absolute bottom-20 left-6 right-6 z-30">
     <StatsDisplay />
-  </aside>
+  </div>
 </main>
 
 <!-- Settings Panel -->

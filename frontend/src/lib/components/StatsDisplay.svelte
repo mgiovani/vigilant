@@ -1,12 +1,13 @@
 <script>
   import { onMount } from 'svelte';
   import { stats, focusState } from '../../stores/app';
-  import { BarChart3, Focus, AlertCircle, Crosshair, TrendingUp, Clock } from 'lucide-svelte';
+  import { Focus, AlertCircle, Crosshair, TrendingUp, Clock } from 'lucide-svelte';
 
   let focusedTime = 0;
   let distractedTime = 0;
   let triggerCount = 0;
   let focusRate = 0;
+  let sessionStartTime = new Date().toLocaleTimeString();
 
   onMount(() => {
     // Subscribe to stats updates
@@ -47,77 +48,57 @@
       return `${seconds}s`;
     }
   }
-
-  function getFocusRateColor(rate) {
-    return 'text-white';
-  }
 </script>
 
-<div class="h-full flex flex-col gap-6">
-  <!-- Header -->
-  <div class="space-y-1">
-    <div class="flex items-center gap-2">
-      <BarChart3 size={20} class="text-accent-400" />
-      <h2 class="text-lg font-bold text-gray-100">Session Stats</h2>
-    </div>
-    <p class="text-xs text-gray-500">Real-time focus tracking</p>
-  </div>
-
-  <!-- Stats Cards - Monochrome -->
-  <div class="space-y-2">
-    <!-- Focused Time Card -->
-    <div class="bg-dark-900 rounded-xl p-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <Focus size={16} class="text-gray-500" />
-          <span class="text-sm text-gray-400">Focused</span>
-        </div>
-        <span class="font-mono text-sm font-semibold text-white">{formatDuration(focusedTime)}</span>
+<!-- Glassmorphism Panel -->
+<div class="bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+  <!-- 4-Column Grid -->
+  <div class="grid grid-cols-4 gap-8">
+    <!-- Stat 1: Focused -->
+    <div class="flex flex-col">
+      <div class="flex items-center gap-2 mb-2">
+        <Focus size={18} class="text-white/60" />
+        <span class="text-sm font-medium text-white/80">Focused</span>
       </div>
+      <span class="text-5xl font-bold text-white tracking-tight">{formatDuration(focusedTime)}</span>
+      <span class="text-sm text-white/50 mt-1">Focused</span>
     </div>
 
-    <!-- Distracted Time Card -->
-    <div class="bg-dark-900 rounded-xl p-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <AlertCircle size={16} class="text-gray-500" />
-          <span class="text-sm text-gray-400">Distracted</span>
-        </div>
-        <span class="font-mono text-sm font-semibold text-white">{formatDuration(distractedTime)}</span>
+    <!-- Stat 2: Distracted -->
+    <div class="flex flex-col">
+      <div class="flex items-center gap-2 mb-2">
+        <AlertCircle size={18} class="text-white/60" />
+        <span class="text-sm font-medium text-white/80">Distracted</span>
       </div>
+      <span class="text-5xl font-bold text-white tracking-tight">{formatDuration(distractedTime)}</span>
+      <span class="text-sm text-white/50 mt-1">Distracted</span>
     </div>
 
-    <!-- FBI Triggers Card -->
-    <div class="bg-dark-900 rounded-xl p-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <Crosshair size={16} class="text-gray-500" />
-          <span class="text-sm text-gray-400">FBI Triggers</span>
-        </div>
-        <span class="font-mono text-sm font-semibold text-white">{triggerCount}x</span>
+    <!-- Stat 3: FBI Triggers -->
+    <div class="flex flex-col">
+      <div class="flex items-center gap-2 mb-2">
+        <Crosshair size={18} class="text-white/60" />
+        <span class="text-sm font-medium text-white/80">FBI Triggers</span>
       </div>
+      <span class="text-5xl font-bold text-white tracking-tight">{triggerCount}x</span>
+      <span class="text-sm text-white/50 mt-1">FBI Triggers</span>
     </div>
 
-    <!-- Focus Rate Card -->
-    <div class="bg-dark-900 rounded-xl p-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <TrendingUp size={16} class="text-gray-500" />
-          <span class="text-sm text-gray-400">Focus Rate</span>
-        </div>
-        <span class="font-mono text-sm font-semibold {getFocusRateColor(focusRate)}">{focusRate.toFixed(1)}%</span>
+    <!-- Stat 4: Focus Rate -->
+    <div class="flex flex-col">
+      <div class="flex items-center gap-2 mb-2">
+        <TrendingUp size={18} class="text-white/60" />
+        <span class="text-sm font-medium text-white/80">Focus Rate</span>
       </div>
+      <span class="text-5xl font-bold text-white tracking-tight">{focusRate.toFixed(1)}%</span>
+      <span class="text-sm text-white/50 mt-1">Focus Rate</span>
     </div>
   </div>
 
-  <!-- Session Info Footer -->
-  <div class="mt-auto pt-4 border-t border-gray-800">
-    <div class="flex items-center gap-2 text-gray-500">
-      <Clock size={14} />
-      <div class="text-xs">
-        <span>Session started at </span>
-        <span class="font-mono text-gray-400">{new Date().toLocaleTimeString()}</span>
-      </div>
-    </div>
+  <!-- Session Footer -->
+  <div class="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-white/10">
+    <Clock size={14} class="text-white/50" />
+    <span class="text-sm text-white/50">Session started at </span>
+    <span class="font-mono text-sm text-white/70">{sessionStartTime}</span>
   </div>
 </div>
