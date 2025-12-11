@@ -68,18 +68,16 @@ func (a *VanillaApp) GetConfig() map[string]interface{} {
 	if cfg == nil {
 		return map[string]interface{}{
 			"blocklist": map[string]interface{}{
-				"processes": []string{},
-				"websites":  []string{},
-				"patterns":  []string{},
+				"patterns": []string{},
 			},
+			"exceptions": []string{},
 		}
 	}
 	return map[string]interface{}{
 		"blocklist": map[string]interface{}{
-			"processes": cfg.Blocklist.Processes,
-			"websites":  cfg.Blocklist.Websites,
-			"patterns":  cfg.Blocklist.Patterns,
+			"patterns": cfg.Blocklist.Patterns,
 		},
+		"exceptions": cfg.Exceptions,
 	}
 }
 
@@ -112,60 +110,49 @@ func (a *VanillaApp) GetBlocklist() map[string]interface{} {
 	cfg := a.orchestrator.GetConfig()
 	if cfg == nil {
 		return map[string]interface{}{
-			"processes": []string{},
-			"websites":  []string{},
-			"patterns":  []string{},
+			"patterns":   []string{},
+			"exceptions": []string{},
 		}
 	}
 	return map[string]interface{}{
-		"processes": cfg.Blocklist.Processes,
-		"websites":  cfg.Blocklist.Websites,
-		"patterns":  cfg.Blocklist.Patterns,
+		"patterns":   cfg.Blocklist.Patterns,
+		"exceptions": cfg.Exceptions,
 	}
 }
 
-// AddBlocklistEntry adds a new entry to the blocklist
+// AddBlocklistEntry adds a new pattern to the blocklist or exceptions
 func (a *VanillaApp) AddBlocklistEntry(entryType, value string) error {
 	cfg := a.orchestrator.GetConfig()
 	if cfg == nil {
 		return nil
 	}
 	switch entryType {
-	case "processes":
-		cfg.Blocklist.Processes = append(cfg.Blocklist.Processes, value)
-	case "websites":
-		cfg.Blocklist.Websites = append(cfg.Blocklist.Websites, value)
 	case "patterns":
 		cfg.Blocklist.Patterns = append(cfg.Blocklist.Patterns, value)
+	case "exceptions":
+		cfg.Exceptions = append(cfg.Exceptions, value)
 	}
 	return a.SaveConfig()
 }
 
-// RemoveBlocklistEntry removes an entry from the blocklist
+// RemoveBlocklistEntry removes a pattern from the blocklist or exceptions
 func (a *VanillaApp) RemoveBlocklistEntry(entryType, value string) error {
 	cfg := a.orchestrator.GetConfig()
 	if cfg == nil {
 		return nil
 	}
 	switch entryType {
-	case "processes":
-		for i, p := range cfg.Blocklist.Processes {
-			if p == value {
-				cfg.Blocklist.Processes = append(cfg.Blocklist.Processes[:i], cfg.Blocklist.Processes[i+1:]...)
-				break
-			}
-		}
-	case "websites":
-		for i, w := range cfg.Blocklist.Websites {
-			if w == value {
-				cfg.Blocklist.Websites = append(cfg.Blocklist.Websites[:i], cfg.Blocklist.Websites[i+1:]...)
-				break
-			}
-		}
 	case "patterns":
 		for i, p := range cfg.Blocklist.Patterns {
 			if p == value {
 				cfg.Blocklist.Patterns = append(cfg.Blocklist.Patterns[:i], cfg.Blocklist.Patterns[i+1:]...)
+				break
+			}
+		}
+	case "exceptions":
+		for i, e := range cfg.Exceptions {
+			if e == value {
+				cfg.Exceptions = append(cfg.Exceptions[:i], cfg.Exceptions[i+1:]...)
 				break
 			}
 		}

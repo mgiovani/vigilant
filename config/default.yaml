@@ -1,63 +1,44 @@
 # Vigilant Configuration File
+#
+# All patterns are regex-based and case-insensitive.
+# Patterns match against both window titles AND process names.
+#
+# Examples:
+#   - "discord"       → matches "Discord", "DISCORD.EXE", "Discord - Chat"
+#   - "youtube"       → matches "YouTube - Video", "youtube.com"
+#   - "reddit\\.com"  → matches "reddit.com" but not "reddit_com"
+#   - "^steam$"       → matches only "Steam" exactly (not "SteamVR")
 
 blocklist:
-  # Process names to block (case-insensitive)
-  processes:
-    - "Discord"
-    - "Discord.exe"
-    - "Slack"
-    - "Slack.exe"
-    - "Steam"
-    - "Steam.exe"
-    - "Battle.net"
-
-  # Website domains/names to block (simple substring matching, case-insensitive)
-  # These match against browser tab titles
-  websites:
-    - "YouTube"           # Matches any YouTube page (homepage, videos, etc.)
-    - "Twitter"
-    - "reddit"            # Reddit pages contain "reddit" in title
-    - "Instagram"
-    - "TikTok"
-    - "Facebook"
-    - "Twitch"
-
-  # Regex patterns for advanced matching (case-insensitive by default)
-  # These patterns match browser tab titles which typically show:
-  # "Page Title - Site Name" or "Page Title | Site Name"
   patterns:
-    # YouTube: "Video Title - YouTube" or YouTube in URL
-    - "- YouTube$"
-    - "\\| YouTube$"
-    # Twitter/X: Various formats like "Post / X", "Profile / X", "Home / X"
-    - " [/\\|\\-] X$"
-    # Reddit: "Post Title : subreddit" or "- Reddit"
-    - "- Reddit$"
-    - " : r/"
-    # Instagram: "Photo/Video by @user" or "- Instagram"
-    - "- Instagram$"
-    - "Instagram$"
-    # TikTok: "Video - TikTok" or "TikTok - Make Your Day"
-    - "- TikTok"
-    - "TikTok -"
-    # Facebook: Various formats
-    - "- Facebook$"
-    - "\\| Facebook$"
-    # Twitch: "Streamer - Twitch"
-    - "- Twitch$"
-    # Streaming services
-    - "Netflix"
-    - "Prime Video"
-    - "Disney\\+"
-    - "Hulu"
-    - "HBO Max"
-    - "Paramount\\+"
+    # Apps (matches process name or window title)
+    - "discord"
+    - "steam"
+    - "battle\\.net"
 
-# Exceptions - allow these even if they match blocklist
+    # Social media & websites (matches browser tab titles)
+    - "youtube"
+    - "twitter"
+    - "\\bx\\.com\\b"           # X.com (word boundaries to avoid false matches)
+    - "reddit"
+    - "instagram"
+    - "tiktok"
+    - "facebook"
+    - "twitch"
+
+    # Streaming services
+    - "netflix"
+    - "prime video"
+    - "disney\\+"
+    - "hulu"
+    - "hbo max"
+    - "paramount\\+"
+
+# Exceptions - patterns that bypass blocklist when matched
+# Also regex-based and case-insensitive
 exceptions:
-  - "YouTube Music"        # Allow music streaming
-  - "Work - YouTube"       # Allow work-related YouTube
-  - "YouTube Studio"       # Allow content creation
+  - "youtube music"       # Allow music streaming
+  - "youtube studio"      # Allow content creation
 
 player:
   # YouTube playlist or video URL for lofi music

@@ -16,11 +16,13 @@ import (
 	"time"
 )
 
-// BlocklistConfig defines blocked processes, websites, and patterns
+// BlocklistConfig defines blocked patterns (all regex-based, case-insensitive)
+// All patterns are compiled with (?i) flag for case-insensitive matching
+// Patterns match against both window title and process name
 type BlocklistConfig struct {
-	Processes []string `yaml:"processes"`
-	Websites  []string `yaml:"websites"`
-	Patterns  []string `yaml:"patterns"`
+	// Patterns are regex patterns that match window titles or process names
+	// Examples: "discord", "youtube", "reddit\\.com", "netflix"
+	Patterns []string `yaml:"patterns"`
 }
 
 // PlayerConfig defines media player settings
@@ -99,7 +101,7 @@ type UIConfig struct {
 // Config is the root configuration struct
 type Config struct {
 	Blocklist  BlocklistConfig `yaml:"blocklist"`
-	Exceptions []string        `yaml:"exceptions"`
+	Exceptions []string        `yaml:"exceptions"` // Regex patterns for exceptions (case-insensitive)
 	Player     PlayerConfig    `yaml:"player"`
 	Monitor    MonitorConfig   `yaml:"monitor"`
 	UI         UIConfig        `yaml:"ui"`
@@ -109,36 +111,29 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		Blocklist: BlocklistConfig{
-			Processes: []string{
-				"Discord",
-				"Discord.exe",
-				"Slack",
-				"Slack.exe",
-				"Steam",
-				"Steam.exe",
-				"Battle.net",
-			},
-			Websites: []string{
-				"youtube.com",
-				"twitter.com",
-				"x.com",
-				"reddit.com",
-				"instagram.com",
-				"tiktok.com",
-				"facebook.com",
-				"twitch.tv",
-			},
 			Patterns: []string{
-				".*Netflix.*",
-				".*Prime Video.*",
-				".*Disney\\+.*",
-				".*Hulu.*",
+				// Apps (matches process name or window title)
+				"discord",
+				"steam",
+				"battle\\.net",
+				// Websites (matches browser tab titles)
+				"youtube",
+				"twitter",
+				"reddit",
+				"instagram",
+				"tiktok",
+				"facebook",
+				"twitch",
+				// Streaming services
+				"netflix",
+				"prime video",
+				"disney\\+",
+				"hulu",
 			},
 		},
 		Exceptions: []string{
-			"YouTube Music",
-			"Work - YouTube",
-			"YouTube Studio",
+			"youtube music",
+			"youtube studio",
 		},
 		Player: PlayerConfig{
 			LofiPlaylist:  "https://www.youtube.com/watch?v=jfKfPfyJRdk",

@@ -12,11 +12,9 @@ import (
 // TestNewBlocklistMatcher tests the constructor
 func TestNewBlocklistMatcher(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord.exe", "Discord"},
-		Websites:  []string{"reddit.com", "youtube.com"},
-		Patterns:  []string{".*Netflix.*", ".*Prime Video.*"},
+		Patterns: []string{"discord", "reddit", "netflix"},
 	}
-	exceptions := []string{"YouTube Music"}
+	exceptions := []string{"youtube music"}
 
 	bm, err := NewBlocklistMatcher(blocklistCfg, exceptions)
 
@@ -28,22 +26,12 @@ func TestNewBlocklistMatcher(t *testing.T) {
 		t.Fatal("Expected non-nil BlocklistMatcher")
 	}
 
-	// Verify processes are stored (lowercase)
-	if len(bm.processes) != 2 {
-		t.Errorf("Expected 2 processes, got %d", len(bm.processes))
-	}
-
-	// Verify websites are stored (lowercase)
-	if len(bm.websites) != 2 {
-		t.Errorf("Expected 2 websites, got %d", len(bm.websites))
-	}
-
 	// Verify patterns are compiled
-	if len(bm.patterns) != 2 {
-		t.Errorf("Expected 2 compiled patterns, got %d", len(bm.patterns))
+	if len(bm.patterns) != 3 {
+		t.Errorf("Expected 3 compiled patterns, got %d", len(bm.patterns))
 	}
 
-	// Verify exceptions are stored
+	// Verify exceptions are compiled
 	if len(bm.exceptions) != 1 {
 		t.Errorf("Expected 1 exception, got %d", len(bm.exceptions))
 	}
@@ -52,9 +40,7 @@ func TestNewBlocklistMatcher(t *testing.T) {
 // TestNewBlocklistMatcher_InvalidRegex tests handling of invalid regex patterns
 func TestNewBlocklistMatcher_InvalidRegex(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{},
-		Patterns:  []string{"[invalid", ".*valid.*"},
+		Patterns: []string{"[invalid", "valid"},
 	}
 
 	bm, err := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -69,56 +55,50 @@ func TestNewBlocklistMatcher_InvalidRegex(t *testing.T) {
 	}
 }
 
-// TestIsBlocked_ProcessMatchExact tests process name matching (exact)
-func TestIsBlocked_ProcessMatchExact(t *testing.T) {
+// TestIsBlocked_ProcessMatch tests process name matching via regex
+func TestIsBlocked_ProcessMatch(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord", "Slack.exe"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"discord", "slack"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
 
 	window := &monitor.WindowInfo{
 		PID:       1234,
-		Title:     "Discord",
+		Title:     "Some Window",
 		Process:   "Discord.exe",
 		Timestamp: time.Now(),
 	}
 
 	if !bm.IsBlocked(window) {
-		t.Error("Expected Discord.exe to be blocked")
+		t.Error("Expected Discord.exe to be blocked by 'discord' pattern")
 	}
 }
 
 // TestIsBlocked_ProcessMatchCase tests case-insensitive process matching
 func TestIsBlocked_ProcessMatchCase(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"discord"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"discord"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
 
 	window := &monitor.WindowInfo{
 		PID:       1234,
-		Title:     "Discord",
+		Title:     "Some Window",
 		Process:   "DISCORD.EXE",
 		Timestamp: time.Now(),
 	}
 
 	if !bm.IsBlocked(window) {
-		t.Error("Expected DISCORD.EXE to match lowercase discord")
+		t.Error("Expected DISCORD.EXE to match lowercase discord pattern")
 	}
 }
 
-// TestIsBlocked_WebsiteMatch tests website substring matching
-func TestIsBlocked_WebsiteMatch(t *testing.T) {
+// TestIsBlocked_TitleMatch tests window title matching
+func TestIsBlocked_TitleMatch(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{"reddit.com"},
-		Patterns:  []string{},
+		Patterns: []string{"reddit"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -131,16 +111,14 @@ func TestIsBlocked_WebsiteMatch(t *testing.T) {
 	}
 
 	if !bm.IsBlocked(window) {
-		t.Error("Expected window with reddit.com in title to be blocked")
+		t.Error("Expected window with reddit in title to be blocked")
 	}
 }
 
-// TestIsBlocked_WebsiteMatchCase tests case-insensitive website matching
-func TestIsBlocked_WebsiteMatchCase(t *testing.T) {
+// TestIsBlocked_TitleMatchCase tests case-insensitive title matching
+func TestIsBlocked_TitleMatchCase(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{"REDDIT.COM"},
-		Patterns:  []string{},
+		Patterns: []string{"REDDIT"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -153,16 +131,14 @@ func TestIsBlocked_WebsiteMatchCase(t *testing.T) {
 	}
 
 	if !bm.IsBlocked(window) {
-		t.Error("Expected case-insensitive website match")
+		t.Error("Expected case-insensitive title match")
 	}
 }
 
-// TestIsBlocked_PatternMatch tests regex pattern matching
+// TestIsBlocked_PatternMatch tests complex regex pattern matching
 func TestIsBlocked_PatternMatch(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{},
-		Patterns:  []string{".*Netflix.*"},
+		Patterns: []string{"netflix"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -179,37 +155,12 @@ func TestIsBlocked_PatternMatch(t *testing.T) {
 	}
 }
 
-// TestIsBlocked_ExceptionBypassesProcess tests that exceptions bypass process rules
-func TestIsBlocked_ExceptionBypassesProcess(t *testing.T) {
+// TestIsBlocked_ExceptionBypassesTitle tests that exceptions bypass title matching
+func TestIsBlocked_ExceptionBypassesTitle(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Chrome"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"youtube"},
 	}
-	exceptions := []string{"Work - YouTube"}
-
-	bm, _ := NewBlocklistMatcher(blocklistCfg, exceptions)
-
-	window := &monitor.WindowInfo{
-		PID:       1234,
-		Title:     "Work - YouTube in Chrome",
-		Process:   "Chrome.exe",
-		Timestamp: time.Now(),
-	}
-
-	if bm.IsBlocked(window) {
-		t.Error("Expected exception to bypass process block")
-	}
-}
-
-// TestIsBlocked_ExceptionBypassesWebsite tests that exceptions bypass website rules
-func TestIsBlocked_ExceptionBypassesWebsite(t *testing.T) {
-	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{"youtube.com"},
-		Patterns:  []string{},
-	}
-	exceptions := []string{"YouTube Music"}
+	exceptions := []string{"youtube music"}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, exceptions)
 
@@ -221,39 +172,48 @@ func TestIsBlocked_ExceptionBypassesWebsite(t *testing.T) {
 	}
 
 	if bm.IsBlocked(window) {
-		t.Error("Expected YouTube Music exception to bypass youtube.com website block")
+		t.Error("Expected YouTube Music exception to bypass youtube block")
 	}
 }
 
-// TestIsBlocked_ExceptionBypassesPattern tests that exceptions bypass pattern rules
-func TestIsBlocked_ExceptionBypassesPattern(t *testing.T) {
+// TestIsBlocked_ExceptionBypassesProcess tests that exceptions can match process names
+func TestIsBlocked_ExceptionBypassesProcess(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{},
-		Patterns:  []string{".*Netflix.*"},
+		Patterns: []string{"chrome"},
 	}
-	exceptions := []string{"Work Netflix"}
+	exceptions := []string{"work chrome"} // Won't match process
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, exceptions)
 
+	// This should still be blocked because exception matches title, not process
 	window := &monitor.WindowInfo{
 		PID:       1234,
-		Title:     "Work Netflix - Learning Content",
+		Title:     "Some Page - Google Chrome",
 		Process:   "chrome.exe",
 		Timestamp: time.Now(),
 	}
 
-	if bm.IsBlocked(window) {
-		t.Error("Expected exception to bypass pattern block")
+	if !bm.IsBlocked(window) {
+		t.Error("Expected chrome.exe to be blocked (exception doesn't match)")
+	}
+
+	// This should NOT be blocked because title matches exception
+	window2 := &monitor.WindowInfo{
+		PID:       1234,
+		Title:     "Work Chrome Tasks",
+		Process:   "chrome.exe",
+		Timestamp: time.Now(),
+	}
+
+	if bm.IsBlocked(window2) {
+		t.Error("Expected 'Work Chrome' title to bypass block via exception")
 	}
 }
 
 // TestIsBlocked_NotBlocked tests that non-blocked windows are allowed
 func TestIsBlocked_NotBlocked(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord"},
-		Websites:  []string{"reddit.com"},
-		Patterns:  []string{".*Netflix.*"},
+		Patterns: []string{"discord", "reddit", "netflix"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -273,9 +233,7 @@ func TestIsBlocked_NotBlocked(t *testing.T) {
 // TestIsBlocked_EmptyBlocklist tests that empty blocklist never blocks
 func TestIsBlocked_EmptyBlocklist(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -295,9 +253,7 @@ func TestIsBlocked_EmptyBlocklist(t *testing.T) {
 // TestIsBlocked_NilWindow tests handling of nil window
 func TestIsBlocked_NilWindow(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"discord"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -307,43 +263,82 @@ func TestIsBlocked_NilWindow(t *testing.T) {
 	}
 }
 
-// TestIsBlocked_WindowsPathHandling tests Windows path handling
-func TestIsBlocked_WindowsPathHandling(t *testing.T) {
+// TestIsBlocked_SpecialRegexChars tests patterns with special regex characters
+func TestIsBlocked_SpecialRegexChars(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"disney\\+", "battle\\.net"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
 
-	// Note: The monitor.WindowInfo.Process should be just the executable name,
-	// but we test that our blocker handles it correctly
-	window := &monitor.WindowInfo{
-		PID:       1234,
-		Title:     "Discord",
-		Process:   "discord.exe",
-		Timestamp: time.Now(),
+	tests := []struct {
+		title   string
+		blocked bool
+	}{
+		{"Disney+ - Watching", true},
+		{"Battle.net Launcher", true},
+		{"Disneyplus - Browser", false}, // Should NOT match disney+
+		{"Battlexnet", false},           // Should NOT match battle.net
 	}
 
-	if !bm.IsBlocked(window) {
-		t.Error("Expected discord.exe from Windows path to be blocked")
+	for _, tc := range tests {
+		window := &monitor.WindowInfo{
+			PID:       1234,
+			Title:     tc.title,
+			Process:   "test.exe",
+			Timestamp: time.Now(),
+		}
+
+		if bm.IsBlocked(window) != tc.blocked {
+			t.Errorf("Title '%s': expected blocked=%v, got %v", tc.title, tc.blocked, !tc.blocked)
+		}
+	}
+}
+
+// TestIsBlocked_WordBoundaries tests patterns with word boundaries
+func TestIsBlocked_WordBoundaries(t *testing.T) {
+	blocklistCfg := config.BlocklistConfig{
+		Patterns: []string{"\\bx\\.com\\b"},
+	}
+
+	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
+
+	tests := []struct {
+		title   string
+		blocked bool
+	}{
+		{"Home / X.com - Browser", true},
+		{"x.com - Twitter", true},
+		{"prefix.com", false},   // Should NOT match
+		{"example.com", false},  // Should NOT match
+		{"foxnews.com", false},  // Should NOT match (x.com inside word)
+	}
+
+	for _, tc := range tests {
+		window := &monitor.WindowInfo{
+			PID:       1234,
+			Title:     tc.title,
+			Process:   "browser.exe",
+			Timestamp: time.Now(),
+		}
+
+		if bm.IsBlocked(window) != tc.blocked {
+			t.Errorf("Title '%s': expected blocked=%v, got %v", tc.title, tc.blocked, !tc.blocked)
+		}
 	}
 }
 
 // TestIsBlocked_MultipleMatches tests that first matching rule triggers block
 func TestIsBlocked_MultipleMatches(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord"},
-		Websites:  []string{"discord.com"},
-		Patterns:  []string{".*Discord.*"},
+		Patterns: []string{"discord", "chat"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
 
 	window := &monitor.WindowInfo{
 		PID:       1234,
-		Title:     "Discord - discord.com",
+		Title:     "Discord - chat channel",
 		Process:   "Discord.exe",
 		Timestamp: time.Now(),
 	}
@@ -356,9 +351,7 @@ func TestIsBlocked_MultipleMatches(t *testing.T) {
 // TestGetBlockReason_NoBlock tests that GetBlockReason returns empty for allowed windows
 func TestGetBlockReason_NoBlock(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"discord"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -376,38 +369,10 @@ func TestGetBlockReason_NoBlock(t *testing.T) {
 	}
 }
 
-// TestGetBlockReason_ProcessBlock tests GetBlockReason for process block
-func TestGetBlockReason_ProcessBlock(t *testing.T) {
+// TestGetBlockReason_TitleBlock tests GetBlockReason for title-based block
+func TestGetBlockReason_TitleBlock(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord.exe"},
-		Websites:  []string{},
-		Patterns:  []string{},
-	}
-
-	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
-
-	window := &monitor.WindowInfo{
-		PID:       1234,
-		Title:     "Discord",
-		Process:   "Discord.exe",
-		Timestamp: time.Now(),
-	}
-
-	reason := bm.GetBlockReason(window)
-	if reason == "" {
-		t.Error("Expected non-empty reason for process block")
-	}
-	if !contains(reason, "process rule") {
-		t.Errorf("Expected 'process rule' in reason, got: %s", reason)
-	}
-}
-
-// TestGetBlockReason_WebsiteBlock tests GetBlockReason for website block
-func TestGetBlockReason_WebsiteBlock(t *testing.T) {
-	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{"reddit.com"},
-		Patterns:  []string{},
+		Patterns: []string{"reddit"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -421,45 +386,41 @@ func TestGetBlockReason_WebsiteBlock(t *testing.T) {
 
 	reason := bm.GetBlockReason(window)
 	if reason == "" {
-		t.Error("Expected non-empty reason for website block")
+		t.Error("Expected non-empty reason for title block")
 	}
-	if !contains(reason, "website rule") {
-		t.Errorf("Expected 'website rule' in reason, got: %s", reason)
+	if !contains(reason, "pattern") || !contains(reason, "title") {
+		t.Errorf("Expected 'pattern' and 'title' in reason, got: %s", reason)
 	}
 }
 
-// TestGetBlockReason_PatternBlock tests GetBlockReason for pattern block
-func TestGetBlockReason_PatternBlock(t *testing.T) {
+// TestGetBlockReason_ProcessBlock tests GetBlockReason for process-based block
+func TestGetBlockReason_ProcessBlock(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{},
-		Websites:  []string{},
-		Patterns:  []string{".*Netflix.*"},
+		Patterns: []string{"discord"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
 
 	window := &monitor.WindowInfo{
 		PID:       1234,
-		Title:     "Netflix - Stranger Things",
-		Process:   "chrome.exe",
+		Title:     "Random Window Title",
+		Process:   "Discord.exe",
 		Timestamp: time.Now(),
 	}
 
 	reason := bm.GetBlockReason(window)
 	if reason == "" {
-		t.Error("Expected non-empty reason for pattern block")
+		t.Error("Expected non-empty reason for process block")
 	}
-	if !contains(reason, "pattern rule") {
-		t.Errorf("Expected 'pattern rule' in reason, got: %s", reason)
+	if !contains(reason, "pattern") || !contains(reason, "process") {
+		t.Errorf("Expected 'pattern' and 'process' in reason, got: %s", reason)
 	}
 }
 
 // TestGetBlockReason_NilWindow tests GetBlockReason with nil window
 func TestGetBlockReason_NilWindow(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"discord"},
 	}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, []string{})
@@ -473,11 +434,9 @@ func TestGetBlockReason_NilWindow(t *testing.T) {
 // TestGetBlockReason_ExceptionOverride tests that GetBlockReason respects exceptions
 func TestGetBlockReason_ExceptionOverride(t *testing.T) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord"},
-		Websites:  []string{},
-		Patterns:  []string{},
+		Patterns: []string{"discord"},
 	}
-	exceptions := []string{"Work Discord"}
+	exceptions := []string{"work discord"}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, exceptions)
 
@@ -497,11 +456,9 @@ func TestGetBlockReason_ExceptionOverride(t *testing.T) {
 // BenchmarkIsBlocked benchmarks the IsBlocked method
 func BenchmarkIsBlocked(b *testing.B) {
 	blocklistCfg := config.BlocklistConfig{
-		Processes: []string{"Discord", "Slack", "Steam"},
-		Websites:  []string{"reddit.com", "youtube.com", "twitter.com"},
-		Patterns:  []string{".*Netflix.*", ".*Prime Video.*"},
+		Patterns: []string{"discord", "slack", "steam", "reddit", "youtube", "twitter", "netflix", "prime video"},
 	}
-	exceptions := []string{"YouTube Music"}
+	exceptions := []string{"youtube music"}
 
 	bm, _ := NewBlocklistMatcher(blocklistCfg, exceptions)
 
@@ -509,6 +466,28 @@ func BenchmarkIsBlocked(b *testing.B) {
 		PID:       1234,
 		Title:     "VSCode - my-project",
 		Process:   "code.exe",
+		Timestamp: time.Now(),
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		bm.IsBlocked(window)
+	}
+}
+
+// BenchmarkIsBlocked_Match benchmarks IsBlocked when there's a match
+func BenchmarkIsBlocked_Match(b *testing.B) {
+	blocklistCfg := config.BlocklistConfig{
+		Patterns: []string{"discord", "slack", "steam", "reddit", "youtube", "twitter", "netflix", "prime video"},
+	}
+	exceptions := []string{"youtube music"}
+
+	bm, _ := NewBlocklistMatcher(blocklistCfg, exceptions)
+
+	window := &monitor.WindowInfo{
+		PID:       1234,
+		Title:     "Watching Netflix",
+		Process:   "chrome.exe",
 		Timestamp: time.Now(),
 	}
 

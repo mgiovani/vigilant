@@ -26,12 +26,8 @@ func TestDefaultConfig(t *testing.T) {
 		t.Errorf("Expected UI mode 'gui', got '%s'", cfg.UI.Mode)
 	}
 
-	if len(cfg.Blocklist.Processes) == 0 {
-		t.Errorf("Expected non-empty processes list")
-	}
-
-	if len(cfg.Blocklist.Websites) == 0 {
-		t.Errorf("Expected non-empty websites list")
+	if len(cfg.Blocklist.Patterns) == 0 {
+		t.Errorf("Expected non-empty patterns list")
 	}
 
 	if len(cfg.Exceptions) == 0 {
@@ -85,12 +81,10 @@ func TestValidateWithInvalidVolume(t *testing.T) {
 
 func TestValidateWithEmptyBlocklist(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.Blocklist.Processes = []string{}
-	cfg.Blocklist.Websites = []string{}
 	cfg.Blocklist.Patterns = []string{}
 	err := cfg.Validate()
 	if err == nil {
-		t.Errorf("Expected validation error for empty blocklist")
+		t.Errorf("Expected validation error for empty blocklist patterns")
 	}
 }
 
@@ -101,14 +95,12 @@ func TestLoadConfigFromPath(t *testing.T) {
 
 	content := `
 blocklist:
-  processes:
-    - "Discord"
-  websites:
-    - "youtube.com"
-  patterns: []
+  patterns:
+    - "discord"
+    - "youtube"
 
 exceptions:
-  - "YouTube Music"
+  - "youtube music"
 
 player:
   lofi_playlist: "https://www.youtube.com/watch?v=test"
@@ -146,8 +138,12 @@ ui:
 		t.Errorf("Expected default_volume 0.7, got %f", cfg.Player.DefaultVolume)
 	}
 
-	if len(cfg.Blocklist.Processes) != 1 || cfg.Blocklist.Processes[0] != "Discord" {
-		t.Errorf("Expected processes ['Discord'], got %v", cfg.Blocklist.Processes)
+	if len(cfg.Blocklist.Patterns) != 2 {
+		t.Errorf("Expected 2 patterns, got %d", len(cfg.Blocklist.Patterns))
+	}
+
+	if cfg.Blocklist.Patterns[0] != "discord" {
+		t.Errorf("Expected first pattern 'discord', got %s", cfg.Blocklist.Patterns[0])
 	}
 }
 
@@ -164,17 +160,14 @@ func TestConfigYAMLParsing(t *testing.T) {
 
 	content := `
 blocklist:
-  processes:
-    - "Discord"
-    - "Slack.exe"
-  websites:
-    - "reddit.com"
-    - "youtube.com"
   patterns:
-    - ".*Netflix.*"
+    - "discord"
+    - "slack"
+    - "reddit"
+    - "netflix"
 
 exceptions:
-  - "Work - YouTube"
+  - "youtube music"
 
 player:
   lofi_playlist: "https://example.com/playlist"
@@ -204,12 +197,8 @@ ui:
 		t.Fatalf("Valid config failed validation: %v", err)
 	}
 
-	if len(cfg.Blocklist.Processes) != 2 {
-		t.Errorf("Expected 2 processes, got %d", len(cfg.Blocklist.Processes))
-	}
-
-	if len(cfg.Blocklist.Websites) != 2 {
-		t.Errorf("Expected 2 websites, got %d", len(cfg.Blocklist.Websites))
+	if len(cfg.Blocklist.Patterns) != 4 {
+		t.Errorf("Expected 4 patterns, got %d", len(cfg.Blocklist.Patterns))
 	}
 
 	if !cfg.UI.AlwaysOnTop {

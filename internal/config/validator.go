@@ -31,8 +31,8 @@ func (c *Config) Validate() error {
 	}
 
 	// Validate blocklist
-	if len(c.Blocklist.Processes) == 0 && len(c.Blocklist.Websites) == 0 && len(c.Blocklist.Patterns) == 0 {
-		errs = append(errs, "at least one of blocklist.processes, blocklist.websites, or blocklist.patterns must be configured")
+	if len(c.Blocklist.Patterns) == 0 {
+		errs = append(errs, "blocklist.patterns must contain at least one pattern")
 	}
 
 	// Validate UI mode
@@ -51,8 +51,8 @@ func (c *Config) Validate() error {
 		log.Printf("WARNING: monitor.poll_interval is very high (%v), responsiveness may suffer", c.Monitor.PollInterval.Duration())
 	}
 
-	if len(c.Exceptions) > 0 && len(c.Blocklist.Processes) == 0 && len(c.Blocklist.Websites) == 0 && len(c.Blocklist.Patterns) == 0 {
-		log.Printf("WARNING: exceptions are defined but no blocklist rules exist")
+	if len(c.Exceptions) > 0 && len(c.Blocklist.Patterns) == 0 {
+		log.Printf("WARNING: exceptions are defined but no blocklist patterns exist")
 	}
 
 	if len(errs) > 0 {
