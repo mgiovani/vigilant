@@ -56,7 +56,7 @@ func (c *Config) Validate() error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("configuration validation failed:\n  - " + strings.Join(errs, "\n  - "))
+		return fmt.Errorf("configuration validation failed:\n  - %s", strings.Join(errs, "\n  - "))
 	}
 
 	return nil
