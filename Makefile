@@ -1,4 +1,4 @@
-.PHONY: dev build build-windows build-darwin build-darwin-universal install clean test help
+.PHONY: dev build build-windows build-darwin build-darwin-universal install clean test help setup
 
 # Detect OS
 UNAME_S := $(shell uname -s)
@@ -6,17 +6,26 @@ UNAME_S := $(shell uname -s)
 help:
 	@echo "Vigilant Desktop Application - Available Commands"
 	@echo ""
+	@echo "  make setup                    Install all dependencies (Go + frontend)"
 	@echo "  make dev                      Run development server with hot reload"
 	@echo "  make build                    Build for current OS (auto-detected)"
-	@echo "  make build-windows            Build Windows executable (amd64)"
+	@echo "  make install                  Setup, build, and install app to system"
+	@echo "  make test                     Run Go tests"
+	@echo "  make clean                    Remove build artifacts"
+	@echo ""
+	@echo "  Platform-specific builds:"
 	@echo "  make build-darwin             Build macOS executable (amd64)"
 	@echo "  make build-darwin-universal   Build macOS universal executable (amd64 + arm64)"
-	@echo "  make install                  Build and install app (macOS/Windows)"
-	@echo "  make clean                    Remove build artifacts"
-	@echo "  make test                     Run Go tests"
-	@echo "  make help                     Show this help message"
+	@echo "  make build-windows            Build Windows executable (amd64)"
 
-dev:
+setup:
+	@echo "Installing Go dependencies..."
+	go mod download
+	@echo "Installing frontend dependencies..."
+	cd frontend && npm install
+	@echo "✓ Setup complete"
+
+dev: setup
 	wails dev
 
 # Auto-detect OS and build accordingly
@@ -32,8 +41,8 @@ else
 	wails build -platform windows/amd64
 endif
 
-# Install app to system
-install: build
+# Install app to system (setup + build + install)
+install: setup build
 ifeq ($(UNAME_S),Darwin)
 	@echo "Installing vigilant.app to /Applications..."
 	@rm -rf /Applications/vigilant.app
