@@ -18,20 +18,18 @@ A cross-platform desktop application that helps developers, students, and conten
 
 1. **Download** the latest release from [Releases Page](https://github.com/mgiovani/vigilant/releases)
 2. **macOS**:
-   - Download `vigilant-darwin-universal` (works on Intel and Apple Silicon)
-   - Make executable: `chmod +x vigilant-darwin-universal`
-   - Run: `./vigilant-darwin-universal`
-3. **Windows**:
-   - Download `vigilant-windows-amd64.exe`
-   - Run the executable
-4. **Grant Permissions** (macOS only):
+   - Download `vigilant-darwin-universal-vX.X.X.zip`
+   - Extract and move `vigilant.app` to Applications
    - On first run, grant Accessibility permissions when prompted
    - System Preferences → Security & Privacy → Accessibility → Add Vigilant
+3. **Windows**:
+   - Download `vigilant-windows-amd64-vX.X.X.exe`
+   - Run the executable (click "More info" → "Run anyway" if SmartScreen blocks it)
 
 ### Building from Source
 
 **Requirements**:
-- Go 1.21+
+- Go 1.23+
 - Node.js 18+ (for frontend)
 - Make
 
