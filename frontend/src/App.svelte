@@ -5,8 +5,7 @@
   import FBIVideo from './lib/components/FBIVideo.svelte';
   import StatsDisplay from './lib/components/StatsDisplay.svelte';
   import SettingsPanel from './lib/components/SettingsPanel.svelte';
-  import { Settings } from 'lucide-svelte';
-
+  
   let currentPlayerState = 'lofi';
   let currentFocusState = 'working';
   let settingsPanelOpen = false;
@@ -43,20 +42,9 @@
     </div>
   </div>
 
-  <!-- Header Bar - dark gradient -->
-  <header class="absolute top-0 left-0 right-0 z-30 h-14 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm flex items-center justify-end px-6">
-    <button
-      on:click={() => (settingsPanelOpen = true)}
-      class="p-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white/70 hover:text-white transition-all duration-200"
-      title="Open settings"
-    >
-      <Settings size={20} />
-    </button>
-  </header>
-
   <!-- Stats Glass Panel - bottom overlay (raised to avoid YouTube controls) -->
   <div class="absolute bottom-20 left-6 right-6 z-30">
-    <StatsDisplay />
+    <StatsDisplay on:openSettings={() => (settingsPanelOpen = true)} />
   </div>
 </main>
 

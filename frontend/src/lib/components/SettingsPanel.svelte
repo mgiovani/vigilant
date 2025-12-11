@@ -1,11 +1,8 @@
 <script>
-  import { onMount } from 'svelte';
   import { X, Settings } from 'lucide-svelte';
   import BlocklistEditor from './BlocklistEditor.svelte';
 
   export let isOpen = false;
-
-  let activeTab = 'blocklist';
 
   function closePanel() {
     isOpen = false;
@@ -40,35 +37,9 @@
         </button>
       </div>
 
-      <!-- Navigation Tabs -->
-      <div class="border-b border-white/10 px-6 flex gap-0">
-        <button
-          on:click={() => (activeTab = 'blocklist')}
-          class="px-4 py-3 text-sm font-medium transition-colors border-b-2 {activeTab === 'blocklist'
-            ? 'text-white border-white'
-            : 'text-white/50 border-transparent hover:text-white/70'}"
-        >
-          Blocklist
-        </button>
-        <button
-          on:click={() => (activeTab = 'general')}
-          class="px-4 py-3 text-sm font-medium transition-colors border-b-2 {activeTab === 'general'
-            ? 'text-white border-white'
-            : 'text-white/50 border-transparent hover:text-white/70'}"
-        >
-          General
-        </button>
-      </div>
-
       <!-- Content -->
       <div class="flex-1 overflow-y-auto p-6">
-        {#if activeTab === 'blocklist'}
-          <BlocklistEditor />
-        {:else if activeTab === 'general'}
-          <div class="text-center text-white/40 py-8">
-            <p>General settings coming soon</p>
-          </div>
-        {/if}
+        <BlocklistEditor />
       </div>
     </div>
   </div>
