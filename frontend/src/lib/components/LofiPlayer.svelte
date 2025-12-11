@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { AlertTriangle } from 'lucide-svelte';
   import { focusState } from '../../stores/app';
+  import lofiBackground from '../../assets/lofi-background.webp';
 
   let embedUrl = '';
   let error = '';
@@ -79,12 +80,12 @@
       </div>
     </div>
   {:else if loading}
-    <div class="flex items-center justify-center h-full">
-      <div class="text-center">
+    <div class="loading-container" style="background-image: url({lofiBackground})">
+      <div class="loading-overlay">
         <div class="inline-block relative w-12 h-12 mb-4">
           <div class="animate-spin rounded-full border-2 border-gray-700 border-t-accent h-full w-full" />
         </div>
-        <p class="text-sm text-gray-400">Finding lofi stream...</p>
+        <p class="text-sm text-gray-300">Finding lofi stream...</p>
       </div>
     </div>
   {:else}
@@ -108,6 +109,24 @@
     bottom: 0;
     display: flex;
     flex-direction: column;
+  }
+
+  .loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .loading-overlay {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 1rem;
+    backdrop-filter: blur(4px);
   }
 
   .player-iframe {
