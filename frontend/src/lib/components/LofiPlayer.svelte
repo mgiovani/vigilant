@@ -1,31 +1,72 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { AlertTriangle } from 'lucide-svelte';
+  import { focusState } from '../../stores/app';
 
   let embedUrl = '';
   let error = '';
   let loading = true;
+  let iframeElement;
+  let unsubscribe;
+
+  // Send postMessage command to YouTube iframe
+  function sendYouTubeCommand(command) {
+    if (iframeElement && iframeElement.contentWindow) {
+      iframeElement.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: command, args: [] }),
+        '*'
+      );
+    }
+  }
+
+  function pauseVideo() {
+    console.log('[LofiPlayer] Pausing YouTube video');
+    sendYouTubeCommand('pauseVideo');
+  }
+
+  function playVideo() {
+    console.log('[LofiPlayer] Playing YouTube video');
+    sendYouTubeCommand('playVideo');
+  }
 
   onMount(async () => {
     try {
       // Get embed URL from backend (uses HTTP localhost proxy to fix Error 153)
       const url = await window.go.main.VanillaApp.GetLofiEmbedURL();
       if (url) {
-        embedUrl = url;
+        // Ensure enablejsapi=1 is in the URL for postMessage control
+        const urlObj = new URL(url);
+        urlObj.searchParams.set('enablejsapi', '1');
+        embedUrl = urlObj.toString();
       }
       console.log('Loaded embed URL from backend:', embedUrl);
       loading = false;
     } catch (e) {
       console.warn('Failed to get embed URL from backend:', e);
-      // Fallback to direct YouTube URL (works in browser, not in native app)
-      embedUrl = 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1';
+      // Fallback to direct YouTube URL with enablejsapi
+      embedUrl = 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1';
       loading = false;
+    }
+
+    // Subscribe to focus state changes
+    unsubscribe = focusState.subscribe((state) => {
+      if (state.state === 'distracted') {
+        pauseVideo();
+      } else if (state.state === 'working') {
+        playVideo();
+      }
+    });
+  });
+
+  onDestroy(() => {
+    if (unsubscribe) {
+      unsubscribe();
     }
   });
 
 </script>
 
-<div class="player-container bg-dark-950">
+<div class="player-container bg-black">
   {#if error}
     <div class="flex items-center justify-center h-full">
       <div class="text-center">
@@ -48,6 +89,7 @@
     </div>
   {:else}
     <iframe
+      bind:this={iframeElement}
       src={embedUrl}
       title="Lofi Hip Hop Radio"
       class="player-iframe"
