@@ -62,6 +62,9 @@ else
 endif
 
 build-windows:
+	@echo "WARNING: Cross-compiling from macOS may produce broken executables."
+	@echo "         For production Windows builds, use GitHub Actions (push a tag)."
+	@echo ""
 	wails build -platform windows/amd64 -webview2 embed
 
 build-darwin:
