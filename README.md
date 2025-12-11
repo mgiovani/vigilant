@@ -1,16 +1,19 @@
-# Vigilant - Stay Focused
+# Vigilant 🚨
 
-A cross-platform desktop application that helps developers, students, and content creators stay focused by monitoring their active window and triggering a humorous FBI meme whenever they try to access blocked applications or websites.
+**The FBI is watching your screen.**
+
+Try to open Discord? Reddit? Twitter? *FBI OPEN UP* blasts at full volume until you get back to work.
+
+Stay focused = lofi beats. Get distracted = FBI raid.
 
 ## Features
 
-- **Real-Time Window Monitoring**: Detects when you switch to blocked apps/websites
-- **FBI Meme Deterrent**: Comedic FBI "Open Up" video plays at full volume (perfect for TikTok!)
-- **Lofi Music Player**: Embedded YouTube Lofi Girl stream for productive ambience
-- **Live Statistics**: Track your focus rate, distraction time, and FBI triggers in real-time
-- **Customizable Blocklist**: Easily configure which processes and websites to block
-- **Cross-Platform**: Works on Windows 10/11 and macOS (Intel and Apple Silicon)
-- **Lightweight**: Single portable executable, no installation required
+- 🎵 **Lofi Mode** - Chill YouTube stream while you work
+- 🚨 **FBI Mode** - Classic meme video when you slack off (full volume, of course)
+- 📊 **Stats** - Track focus time, distractions, and FBI trigger count
+- ⚙️ **Custom Blocklist** - Block whatever distracts you (regex support)
+- 💻 **Cross-Platform** - Windows 10/11 and macOS (Intel + Apple Silicon)
+- 🔒 **Privacy** - No telemetry, no data collection, just judgement
 
 ## Installation
 
@@ -52,9 +55,9 @@ make dev      # Development mode with hot reload
 
 ### Default Blocklist
 
-By default, Vigilant blocks (all patterns are regex-based):
-- **Applications**: Discord, Steam, Battle.net
-- **Social Media**: YouTube, Twitter/X, Reddit, Instagram, TikTok, Facebook, Twitch
+Out of the box, the FBI will raid you for:
+- **Apps**: Discord, Steam, Battle.net
+- **Social**: YouTube, Twitter/X, Reddit, Instagram, TikTok, Facebook, Twitch
 - **Streaming**: Netflix, Prime Video, Disney+, Hulu, HBO Max, Paramount+
 
 ### Customizing Your Blocklist
@@ -101,16 +104,14 @@ By default, Vigilant blocks (all patterns are regex-based):
 | `monitor.poll_interval` | Duration | 100ms | How often to check active window |
 | `monitor.grace_period` | Duration | 500ms | Delay before triggering FBI meme |
 
-## Usage
+## How It Works
 
-### Basic Workflow
-
-1. **Start Vigilant**: Run the application
-2. **Work normally**: Your focus time accumulates
-3. **Try to distract**: Switch to Discord, Reddit, etc.
-4. **Grace period**: 500ms timer starts (you can switch back before it expires)
-5. **FBI trigger**: If timer expires, FBI meme plays at full volume
-6. **Return to work**: Switch back to IDE/document, lofi resumes
+1. **Start Vigilant** - App opens with lofi beats playing
+2. **Work** - Focus time goes up, you're being productive
+3. **Get tempted** - Switch to Discord, Reddit, YouTube...
+4. **Grace period** - You have 500ms to reconsider your life choices
+5. **FBI OPEN UP** - Meme plays at full volume until you alt-tab away
+6. **Back to work** - Lofi resumes, FBI counter increases, shame ensues
 
 ## Troubleshooting
 
@@ -207,11 +208,10 @@ Contributions welcome! Please:
 
 ## Acknowledgments
 
-- [Wails](https://wails.io/) - Go desktop application framework
-- [Svelte](https://svelte.dev/) - Reactive component framework
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
-- Lofi Girl - For the relaxing background music
+- [Wails](https://wails.io/) - Go desktop framework
+- [Svelte](https://svelte.dev/) - Frontend framework
+- [Lofi Girl](https://www.youtube.com/@LofiGirl) - The vibes
 
 ---
 
-**Stay focused. Stay productive. Stay vigilant.**
+**Stay vigilant. The FBI is watching.** 👀
