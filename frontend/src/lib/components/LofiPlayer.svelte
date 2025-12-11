@@ -25,7 +25,7 @@
 
 </script>
 
-<div class="flex flex-col h-full w-full bg-dark-950">
+<div class="absolute inset-0 flex flex-col bg-dark-950">
   {#if error}
     <div class="flex items-center justify-center h-full">
       <div class="text-center">
@@ -50,7 +50,7 @@
     <iframe
       src={embedUrl}
       title="Lofi Hip Hop Radio"
-      class="w-full flex-1"
+      class="w-full h-full"
       allowfullscreen
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     />

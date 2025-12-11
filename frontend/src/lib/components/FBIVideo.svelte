@@ -25,7 +25,7 @@
   }
 </script>
 
-<div class="relative w-full h-full bg-black">
+<div class="absolute inset-0 bg-black">
   {#if error}
     <div class="flex items-center justify-center h-full bg-dark-950">
       <div class="text-center">
