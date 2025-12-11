@@ -10,6 +10,28 @@
   let iframeElement;
   let unsubscribe;
 
+  // Force layout recalculation to fix video not rendering on first load
+  function handleIframeLoad() {
+    if (!iframeElement) return;
+
+    // Wait for layout to settle, then force a reflow
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        if (iframeElement) {
+          // Force reflow by reading and writing layout properties
+          const currentWidth = iframeElement.offsetWidth;
+          iframeElement.style.width = (currentWidth - 1) + 'px';
+
+          requestAnimationFrame(() => {
+            if (iframeElement) {
+              iframeElement.style.width = '100%';
+            }
+          });
+        }
+      }, 50);
+    });
+  }
+
   // Send postMessage command to YouTube iframe
   function sendYouTubeCommand(command) {
     if (iframeElement && iframeElement.contentWindow) {
@@ -96,6 +118,7 @@
       class="player-iframe"
       allowfullscreen
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      on:load={handleIframeLoad}
     />
   {/if}
 </div>
