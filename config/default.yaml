@@ -1,0 +1,63 @@
+# Vigilant Configuration File
+
+blocklist:
+  # Process names to block (case-insensitive)
+  processes:
+    - "Discord"
+    - "Discord.exe"
+    - "Slack"
+    - "Slack.exe"
+    - "Steam"
+    - "Steam.exe"
+    - "Battle.net"
+
+  # Website domains to block (matches window titles)
+  websites:
+    - "youtube.com"
+    - "twitter.com"
+    - "x.com"
+    - "reddit.com"
+    - "instagram.com"
+    - "tiktok.com"
+    - "facebook.com"
+    - "twitch.tv"
+
+  # Regex patterns for advanced matching
+  patterns:
+    - ".*Netflix.*"
+    - ".*Prime Video.*"
+    - ".*Disney\\+.*"
+    - ".*Hulu.*"
+
+# Exceptions - allow these even if they match blocklist
+exceptions:
+  - "YouTube Music"        # Allow music streaming
+  - "Work - YouTube"       # Allow work-related YouTube
+  - "YouTube Studio"       # Allow content creation
+
+player:
+  # YouTube playlist or video URL for lofi music
+  lofi_playlist: "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+
+  # Path to FBI meme video (embedded:// for bundled assets)
+  fbi_meme_source: "embedded://fbi-meme.mp4"
+
+  # Default volume (0.0 - 1.0)
+  default_volume: 0.5
+
+monitor:
+  # How often to check active window (duration)
+  poll_interval: 100ms
+
+  # Grace period before triggering FBI meme (duration)
+  grace_period: 500ms
+
+ui:
+  # UI mode: "gui" or "tui" (future)
+  mode: "gui"
+
+  # Prefer second monitor for app window
+  second_monitor: true
+
+  # Keep window always on top
+  always_on_top: false
