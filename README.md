@@ -26,9 +26,9 @@ Stay focused = lofi beats. Get distracted = FBI raid.
    - On first run, grant Accessibility permissions when prompted
    - System Preferences → Security & Privacy → Accessibility → Add Vigilant
 3. **Windows 11**:
-   - Download `vigilant-windows-amd64-vX.X.X.exe`
-   - Run the executable (click "More info" → "Run anyway" if SmartScreen blocks it)
-   - WebView2 bootstrapper is embedded and auto-installs if needed
+   - Download `vigilant-windows-amd64-vX.X.X.zip`
+   - Extract and run `vigilant.exe`
+   - Click "More info" → "Run anyway" if SmartScreen blocks it
 
 ### Building from Source
 

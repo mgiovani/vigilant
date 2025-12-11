@@ -55,18 +55,18 @@ jobs:
             echo "version=dev-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           fi
 
-      - name: Rename artifacts
+      - name: Create Windows zip
         shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          mv build/bin/vigilant.exe "build/bin/vigilant-windows-amd64-${VERSION}.exe" || true
+          cd build/bin
+          zip "vigilant-windows-amd64-${VERSION}.zip" vigilant.exe
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: |
-            build/bin/*.exe
+          path: build/bin/*.zip
           retention-days: 30
 
   build-macos:
@@ -112,7 +112,7 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           cd build/bin
-          zip -r "vigilant-macos-universal-${VERSION}.zip" vigilant.app
+          zip -r "vigilant-darwin-universal-${VERSION}.zip" vigilant.app
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
