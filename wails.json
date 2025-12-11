@@ -1,0 +1,22 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "vigilant",
+  "outputfilename": "vigilant",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "assetdir": "./assets",
+  "author": {
+    "name": "mgiovani",
+    "email": "e@giovani.dev"
+  },
+  "build": {
+    "windows": {
+      "icon": "build/windows/icon.ico"
+    },
+    "darwin": {
+      "icon": "build/darwin/icon.icns"
+    }
+  }
+}

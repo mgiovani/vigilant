@@ -1,0 +1,52 @@
+# Build artifacts
+build/bin/
+build/{windows,darwin}/
+*.exe
+*.app
+*.dmg
+
+# Compiled binaries
+main
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.svelte-kit/
+frontend/.vite/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Go
+*.o
+*.a
+*.so
+__pycache__/
+*.pyc
+
+# Misc
+.cache/
+.tmp/
+tmp/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Phase documentation (internal)
+PHASE_8_COMPLETE.md
+PHASE_8_DELIVERABLES.txt
