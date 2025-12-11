@@ -45,7 +45,7 @@
       on:error={handleError}
       playsinline
     >
-      <source src="asset://fbi-meme.mp4" type="video/mp4" />
+      <source src="/assets/fbi-meme.mp4" type="video/mp4" />
       <track kind="captions" />
       Your browser does not support the video tag.
     </video>

@@ -157,6 +157,10 @@ func (a *App) Start(ctx context.Context) error {
 func (a *App) orchestrationLoop() {
 	defer a.logger.Println("Orchestration loop stopped")
 
+	// Ticker for periodic stats updates to frontend
+	statsTicker := time.NewTicker(time.Second)
+	defer statsTicker.Stop()
+
 	for {
 		select {
 		case <-a.ctx.Done():
@@ -168,6 +172,10 @@ func (a *App) orchestrationLoop() {
 
 		case stateChange := <-a.stateManager.StateChanges():
 			a.handleStateChange(stateChange)
+
+		case <-statsTicker.C:
+			// Emit stats update to frontend every second
+			a.emitStatsUpdate()
 		}
 	}
 }
@@ -249,7 +257,13 @@ func (a *App) handleGracePeriod(
 func (a *App) handleStateChange(change blocker.StateChange) {
 	a.mu.RLock()
 	wailsCtx := a.wailsCtx
+	statsTracker := a.statsTracker
 	a.mu.RUnlock()
+
+	// Forward state change to stats tracker for time accumulation
+	if statsTracker != nil {
+		statsTracker.ProcessStateChange(change)
+	}
 
 	// Determine focus state string
 	focusState := "working"

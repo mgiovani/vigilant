@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { playerState, focusState } from './stores/app';
+  import { playerState, focusState, initializeEventListeners } from './stores/app';
   import LofiPlayer from './lib/components/LofiPlayer.svelte';
   import FBIVideo from './lib/components/FBIVideo.svelte';
   import StatsDisplay from './lib/components/StatsDisplay.svelte';
@@ -12,6 +12,9 @@
   let settingsPanelOpen = false;
 
   onMount(() => {
+    // Initialize Wails event listeners for backend communication
+    initializeEventListeners();
+
     // Subscribe to player state changes
     const playerUnsubscribe = playerState.subscribe((state) => {
       currentPlayerState = state;

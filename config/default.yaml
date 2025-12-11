@@ -11,17 +11,16 @@ blocklist:
     - "Steam.exe"
     - "Battle.net"
 
-  # Website domains to block (simple substring matching, case-insensitive)
-  # For domains that appear in URLs/titles directly
+  # Website domains/names to block (simple substring matching, case-insensitive)
+  # These match against browser tab titles
   websites:
-    - "youtube.com"
-    - "twitter.com"
-    - "x.com"
-    - "reddit.com"
-    - "instagram.com"
-    - "tiktok.com"
-    - "facebook.com"
-    - "twitch.tv"
+    - "YouTube"           # Matches any YouTube page (homepage, videos, etc.)
+    - "Twitter"
+    - "reddit"            # Reddit pages contain "reddit" in title
+    - "Instagram"
+    - "TikTok"
+    - "Facebook"
+    - "Twitch"
 
   # Regex patterns for advanced matching (case-insensitive by default)
   # These patterns match browser tab titles which typically show:
