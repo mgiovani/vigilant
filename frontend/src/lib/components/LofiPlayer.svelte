@@ -25,7 +25,7 @@
 
 </script>
 
-<div class="absolute inset-0 flex flex-col bg-dark-950">
+<div class="player-container bg-dark-950">
   {#if error}
     <div class="flex items-center justify-center h-full">
       <div class="text-center">
@@ -50,7 +50,7 @@
     <iframe
       src={embedUrl}
       title="Lofi Hip Hop Radio"
-      class="w-full h-full"
+      class="player-iframe"
       allowfullscreen
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     />
@@ -58,6 +58,23 @@
 </div>
 
 <style>
+  .player-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-iframe {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    border: none;
+  }
+
   :global(#yt-player) {
     width: 100% !important;
     height: 100% !important;

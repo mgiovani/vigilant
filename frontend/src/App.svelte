@@ -37,13 +37,14 @@
 </script>
 
 <main class="flex h-screen bg-dark-950 text-gray-100 overflow-hidden">
-  <!-- Player Panel -->
+  <!-- Player Panel - Both players stay mounted, visibility toggled -->
   <div class="flex-1 flex flex-col relative">
-    {#if currentPlayerState === 'lofi'}
+    <div class="absolute inset-0" class:hidden={currentPlayerState !== 'lofi'}>
       <LofiPlayer />
-    {:else}
-      <FBIVideo />
-    {/if}
+    </div>
+    <div class="absolute inset-0" class:hidden={currentPlayerState === 'lofi'}>
+      <FBIVideo muted={currentPlayerState === 'lofi'} />
+    </div>
 
     <!-- Status Indicator Overlay -->
     <div class="absolute top-4 left-4 z-40">

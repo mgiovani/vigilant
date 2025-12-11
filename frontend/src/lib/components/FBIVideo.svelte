@@ -2,13 +2,30 @@
   import { onMount } from 'svelte';
   import { AlertTriangle, Volume2, VolumeX } from 'lucide-svelte';
 
+  export let muted = false;
+
   let videoElement;
   let error = '';
-  let isMuted = false;
+  let userMuted = false;
+
+  // Effective mute state: muted by parent OR muted by user
+  $: effectiveMuted = muted || userMuted;
+
+  // Update video element when mute state changes
+  $: if (videoElement) {
+    videoElement.muted = effectiveMuted;
+    // Pause when hidden (muted by parent), play when visible
+    if (muted) {
+      videoElement.pause();
+    } else {
+      videoElement.play().catch(() => {});
+    }
+  }
 
   onMount(() => {
     if (videoElement) {
       videoElement.volume = 1.0;
+      videoElement.muted = effectiveMuted;
     }
   });
 
@@ -18,14 +35,11 @@
   }
 
   function toggleMute() {
-    if (videoElement) {
-      videoElement.muted = !videoElement.muted;
-      isMuted = videoElement.muted;
-    }
+    userMuted = !userMuted;
   }
 </script>
 
-<div class="absolute inset-0 bg-black">
+<div class="player-container bg-black">
   {#if error}
     <div class="flex items-center justify-center h-full bg-dark-950">
       <div class="text-center">
@@ -39,7 +53,7 @@
   {:else}
     <video
       bind:this={videoElement}
-      class="w-full h-full object-cover animate-fbi-enter"
+      class="player-video animate-fbi-enter"
       autoplay
       loop
       on:error={handleError}
@@ -55,7 +69,7 @@
       on:click={toggleMute}
       class="absolute top-4 right-4 p-2.5 bg-accent hover:bg-accent-hover rounded-xl text-white font-semibold transition-all duration-200 z-10 flex items-center gap-2"
     >
-      {#if isMuted}
+      {#if userMuted}
         <VolumeX size={18} />
         <span class="text-sm">Unmute</span>
       {:else}
@@ -67,6 +81,20 @@
 </div>
 
 <style>
+  .player-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .player-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   @keyframes fbi-enter {
     from {
       opacity: 0;
