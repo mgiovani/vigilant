@@ -4,9 +4,10 @@ export default {
     extend: {
       colors: {
         dark: {
-          950: '#0a0a0a',
-          900: '#1a1a1a',
-          800: '#2a2a2a',
+          950: '#000000',
+          900: '#0a0a0a',
+          800: '#171717',
+          700: '#262626',
         },
         accent: {
           DEFAULT: '#ffffff',

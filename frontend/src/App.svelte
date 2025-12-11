@@ -36,7 +36,7 @@
     : { text: 'Distracted', dotColor: 'bg-gray-500' };
 </script>
 
-<main class="flex h-screen bg-dark-950 text-gray-100 overflow-hidden">
+<main class="flex h-screen bg-black text-gray-100 overflow-hidden">
   <!-- Player Panel - Both players stay mounted, visibility toggled -->
   <div class="flex-1 flex flex-col relative">
     <div class="absolute inset-0" class:hidden={currentPlayerState !== 'lofi'}>
