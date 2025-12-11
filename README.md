@@ -12,7 +12,7 @@ Stay focused = lofi beats. Get distracted = FBI raid.
 - 🚨 **FBI Mode** - Classic meme video when you slack off (full volume, of course)
 - 📊 **Stats** - Track focus time, distractions, and FBI trigger count
 - ⚙️ **Custom Blocklist** - Block whatever distracts you (regex support)
-- 💻 **Cross-Platform** - Windows 10/11 and macOS (Intel + Apple Silicon)
+- 💻 **Cross-Platform** - Windows 11 and macOS (Intel + Apple Silicon)
 - 🔒 **Privacy** - No telemetry, no data collection, just judgement
 
 ## Installation
@@ -25,9 +25,10 @@ Stay focused = lofi beats. Get distracted = FBI raid.
    - Extract and move `vigilant.app` to Applications
    - On first run, grant Accessibility permissions when prompted
    - System Preferences → Security & Privacy → Accessibility → Add Vigilant
-3. **Windows**:
+3. **Windows 11**:
    - Download `vigilant-windows-amd64-vX.X.X.exe`
    - Run the executable (click "More info" → "Run anyway" if SmartScreen blocks it)
+   - WebView2 bootstrapper is embedded and auto-installs if needed
 
 ### Building from Source
 
@@ -130,6 +131,12 @@ A: Grant permission:
    2. Click the lock to unlock
    3. Click "+" button and select Vigilant application
    4. Restart Vigilant
+
+**Q: Windows app doesn't open / shows nothing**
+A: The app requires Windows 11 and Microsoft Edge WebView2 runtime (pre-installed on Win11).
+   - Run from Command Prompt to see error messages: `.\vigilant.exe`
+   - If WebView2 is missing, the embedded bootstrapper should auto-install it
+   - Manual install: https://developer.microsoft.com/en-us/microsoft-edge/webview2/
 
 **Q: Windows Defender blocks the app**
 A: This is a SmartScreen false positive for unsigned apps. You can:

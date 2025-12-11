@@ -16,7 +16,7 @@ help:
 	@echo "  Platform-specific builds:"
 	@echo "  make build-darwin             Build macOS executable (amd64)"
 	@echo "  make build-darwin-universal   Build macOS universal executable (amd64 + arm64)"
-	@echo "  make build-windows            Build Windows executable (amd64)"
+	@echo "  make build-windows            Build Windows executable (amd64, WebView2 embedded)"
 
 setup:
 	@echo "Installing Go dependencies..."
@@ -62,7 +62,7 @@ else
 endif
 
 build-windows:
-	wails build -platform windows/amd64
+	wails build -platform windows/amd64 -webview2 embed
 
 build-darwin:
 	wails build -platform darwin/amd64

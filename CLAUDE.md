@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Vigilant is a cross-platform desktop application (Windows 10+, macOS 12+) that helps users stay focused by monitoring their active window and triggering a humorous FBI meme video when accessing blocked apps/websites. Built with Go + Wails v2 + Svelte 3.
+Vigilant is a cross-platform desktop application (Windows 11, macOS 12+) that helps users stay focused by monitoring their active window and triggering a humorous FBI meme video when accessing blocked apps/websites. Built with Go + Wails v2 + Svelte 3.
 
 ## Development Commands
 
