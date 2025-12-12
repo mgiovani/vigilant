@@ -7,8 +7,8 @@ Try to open Discord? Reddit? Twitter? *FBI OPEN UP* blasts at full volume until 
 Stay focused = lofi beats. Get distracted = FBI raid.
 
 <p align="center">
-  <img src="assets/screenshots/lofi-mode.png" alt="Lofi Mode - Focused" width="400" />
-  <img src="assets/screenshots/fbi-mode.png" alt="FBI Mode - Distracted" width="400" />
+  <img src="assets/screenshots/lofi-mode.png" alt="Lofi Mode - Focused" width="800" />
+  <img src="assets/screenshots/fbi-mode.png" alt="FBI Mode - Distracted" width="800" />
 </p>
 
 ## Features
