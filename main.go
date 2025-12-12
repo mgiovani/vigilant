@@ -5,35 +5,74 @@ import (
 	"embed"
 	"log"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	appruntime "vigilant/internal/app"
+	"vigilant/internal/config"
 	"vigilant/internal/youtube"
 )
 
-//go:embed all:frontend/dist all:assets
+//go:embed all:frontend/dist
 var assets embed.FS
 
 // VanillaApp wraps the orchestrator app for Wails bindings
 type VanillaApp struct {
-	orchestrator   *appruntime.App
-	youtubeService *youtube.Service
-	embedProxy     *youtube.EmbedProxy
-	configPath     string
+	orchestrator *appruntime.App
+	embedProxy   *youtube.EmbedProxy
+	configPath   string
+	wailsCtx     context.Context
+}
+
+// extractVideoID extracts YouTube video ID from various URL formats
+// Supports: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID, or plain ID
+func extractVideoID(input string) string {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return ""
+	}
+
+	// Pattern for youtube.com/watch?v=ID
+	watchPattern := regexp.MustCompile(`(?:youtube\.com/watch\?.*v=)([a-zA-Z0-9_-]{11})`)
+	if matches := watchPattern.FindStringSubmatch(input); len(matches) > 1 {
+		return matches[1]
+	}
+
+	// Pattern for youtu.be/ID
+	shortPattern := regexp.MustCompile(`(?:youtu\.be/)([a-zA-Z0-9_-]{11})`)
+	if matches := shortPattern.FindStringSubmatch(input); len(matches) > 1 {
+		return matches[1]
+	}
+
+	// Pattern for youtube.com/embed/ID
+	embedPattern := regexp.MustCompile(`(?:youtube\.com/embed/)([a-zA-Z0-9_-]{11})`)
+	if matches := embedPattern.FindStringSubmatch(input); len(matches) > 1 {
+		return matches[1]
+	}
+
+	// If it looks like a plain video ID (11 chars, alphanumeric with _ and -)
+	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9_-]{11}$`, input); matched {
+		return input
+	}
+
+	// Return as-is if no pattern matches (might be a live stream or other format)
+	return input
 }
 
 // NewVanillaApp creates a new Wails-compatible app wrapper
-func NewVanillaApp(orchestrator *appruntime.App, youtubeService *youtube.Service, embedProxy *youtube.EmbedProxy, configPath string) *VanillaApp {
+func NewVanillaApp(orchestrator *appruntime.App, embedProxy *youtube.EmbedProxy, configPath string) *VanillaApp {
 	return &VanillaApp{
-		orchestrator:   orchestrator,
-		youtubeService: youtubeService,
-		embedProxy:     embedProxy,
-		configPath:     configPath,
+		orchestrator: orchestrator,
+		embedProxy:   embedProxy,
+		configPath:   configPath,
 	}
 }
 
@@ -81,17 +120,15 @@ func (a *VanillaApp) GetConfig() map[string]interface{} {
 	}
 }
 
-// GetLofiVideoID returns a working lofi video ID from YouTube API
+// GetLofiVideoID returns the lofi video ID from config
 func (a *VanillaApp) GetLofiVideoID() string {
-	if a.youtubeService == nil {
-		return "jfKfPfyJRdk" // Fallback to hardcoded ID
+	cfg := a.orchestrator.GetConfig()
+	if cfg != nil && cfg.Player.LofiPlaylist != "" {
+		if videoID := extractVideoID(cfg.Player.LofiPlaylist); videoID != "" {
+			return videoID
+		}
 	}
-	videoID, err := a.youtubeService.GetLofiVideoID(context.Background())
-	if err != nil {
-		log.Printf("Error getting lofi video ID: %v", err)
-		return "jfKfPfyJRdk" // Fallback to hardcoded ID
-	}
-	return videoID
+	return "jfKfPfyJRdk" // Lofi Girl fallback
 }
 
 // GetLofiEmbedURL returns the HTTP localhost URL for the YouTube embed proxy
@@ -160,26 +197,61 @@ func (a *VanillaApp) RemoveBlocklistEntry(entryType, value string) error {
 	return a.SaveConfig()
 }
 
+// GetLofiPlaylist returns the current lofi playlist URL from config
+func (a *VanillaApp) GetLofiPlaylist() string {
+	cfg := a.orchestrator.GetConfig()
+	if cfg != nil && cfg.Player.LofiPlaylist != "" {
+		return cfg.Player.LofiPlaylist
+	}
+	return "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+}
+
+// SetLofiPlaylist updates the lofi playlist URL and saves to config
+func (a *VanillaApp) SetLofiPlaylist(url string) error {
+	cfg := a.orchestrator.GetConfig()
+	if cfg == nil {
+		return nil
+	}
+	cfg.Player.LofiPlaylist = url
+	if err := a.SaveConfig(); err != nil {
+		return err
+	}
+	// Emit event for frontend to reload player
+	if a.wailsCtx != nil {
+		runtime.EventsEmit(a.wailsCtx, "lofi:url-changed", url)
+	}
+	return nil
+}
+
+// SetWailsContext stores the Wails context for event emission
+func (a *VanillaApp) SetWailsContext(ctx context.Context) {
+	a.wailsCtx = ctx
+}
+
 // SaveConfig saves the current configuration to disk
 func (a *VanillaApp) SaveConfig() error {
-	// This will be implemented based on the orchestrator's config saving mechanism
-	// For now, return nil as a placeholder
-	return nil
+	cfg := a.orchestrator.GetConfig()
+	if cfg == nil {
+		return nil
+	}
+	data, err := config.MarshalConfig(cfg)
+	if err != nil {
+		return err
+	}
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	configPath := filepath.Join(homeDir, ".vigilant", "config.yaml")
+	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(configPath, data, 0644)
 }
 
 func main() {
 	// Load .env file
 	_ = godotenv.Load()
-
-	// Initialize YouTube service (optional, has fallback)
-	var youtubeService *youtube.Service
-	if apiKey := os.Getenv("YOUTUBE_API_KEY"); apiKey != "" {
-		var err error
-		youtubeService, err = youtube.NewService(apiKey)
-		if err != nil {
-			log.Printf("Warning: YouTube service initialization failed, will use fallback: %v", err)
-		}
-	}
 
 	// Start embed proxy server for YouTube (provides HTTP localhost origin)
 	// This fixes Error 153 by giving YouTube a proper http:// referrer
@@ -195,7 +267,7 @@ func main() {
 	}
 
 	// Create Wails-compatible wrapper
-	app := NewVanillaApp(orchestrator, youtubeService, embedProxy, "")
+	app := NewVanillaApp(orchestrator, embedProxy, "")
 
 	// Create application with options
 	err = wails.Run(&options.App{
@@ -213,6 +285,8 @@ func main() {
 			WindowIsTranslucent:  false,
 		},
 		OnStartup: func(ctx context.Context) {
+			// Store Wails context for event emission
+			app.SetWailsContext(ctx)
 			// Start the orchestrator with the Wails context
 			if err := orchestrator.Start(ctx); err != nil {
 				log.Printf("Failed to start orchestrator: %v", err)

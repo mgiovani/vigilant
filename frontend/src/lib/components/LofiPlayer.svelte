@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { AlertTriangle } from 'lucide-svelte';
+  import { EventsOn } from '../../../wailsjs/runtime/runtime';
   import { focusState } from '../../stores/app';
   import lofiBackground from '../../assets/lofi-background.webp';
 
@@ -9,6 +10,7 @@
   let loading = true;
   let iframeElement;
   let unsubscribe;
+  let unsubscribeLofi;
 
   // Force layout recalculation to fix video not rendering on first load
   function handleIframeLoad() {
@@ -52,6 +54,20 @@
     sendYouTubeCommand('playVideo');
   }
 
+  async function reloadEmbedUrl() {
+    try {
+      const url = await window.go.main.VanillaApp.GetLofiEmbedURL();
+      if (url) {
+        const urlObj = new URL(url);
+        urlObj.searchParams.set('enablejsapi', '1');
+        embedUrl = urlObj.toString();
+        console.log('[LofiPlayer] Reloaded embed URL:', embedUrl);
+      }
+    } catch (e) {
+      console.warn('[LofiPlayer] Failed to reload embed URL:', e);
+    }
+  }
+
   onMount(async () => {
     try {
       // Get embed URL from backend (uses HTTP localhost proxy to fix Error 153)
@@ -79,11 +95,20 @@
         playVideo();
       }
     });
+
+    // Listen for lofi URL changes from settings
+    unsubscribeLofi = EventsOn('lofi:url-changed', () => {
+      console.log('[LofiPlayer] Received lofi:url-changed event');
+      reloadEmbedUrl();
+    });
   });
 
   onDestroy(() => {
     if (unsubscribe) {
       unsubscribe();
+    }
+    if (unsubscribeLofi) {
+      unsubscribeLofi();
     }
   });
 
