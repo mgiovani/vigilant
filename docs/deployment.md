@@ -273,12 +273,6 @@ Current binary sizes:
 - YouTube player loads asynchronously
 - Monitor starts after UI is ready
 
-## Environment Variables
-
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `YOUTUBE_API_KEY` | YouTube Data API key for dynamic lofi stream search | (optional, falls back to hardcoded video ID) |
-
 ## Monitoring and Logging
 
 Logs are written to stderr with timestamps:
