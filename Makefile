@@ -28,17 +28,20 @@ setup:
 dev: setup
 	wails dev
 
+# Build flags to strip debug symbols and reduce binary size
+LDFLAGS := -ldflags="-s -w"
+
 # Auto-detect OS and build accordingly
 build:
 ifeq ($(UNAME_S),Darwin)
 	@echo "Detected macOS - building universal binary..."
-	wails build -platform darwin/universal
+	wails build -platform darwin/universal $(LDFLAGS)
 else ifeq ($(UNAME_S),Linux)
 	@echo "Detected Linux - building linux/amd64..."
-	wails build -platform linux/amd64
+	wails build -platform linux/amd64 $(LDFLAGS)
 else
 	@echo "Detected Windows - building windows/amd64..."
-	wails build -platform windows/amd64
+	wails build -platform windows/amd64 $(LDFLAGS)
 endif
 
 # Install app to system (setup + build + install)
@@ -62,16 +65,13 @@ else
 endif
 
 build-windows:
-	@echo "WARNING: Cross-compiling from macOS may produce broken executables."
-	@echo "         For production Windows builds, use GitHub Actions (push a tag)."
-	@echo ""
-	wails build -platform windows/amd64 -webview2 embed
+	wails build -platform windows/amd64 -webview2 embed $(LDFLAGS)
 
 build-darwin:
-	wails build -platform darwin/amd64
+	wails build -platform darwin/amd64 $(LDFLAGS)
 
 build-darwin-universal:
-	wails build -platform darwin/universal
+	wails build -platform darwin/universal $(LDFLAGS)
 
 clean:
 	rm -rf build/bin

@@ -35,13 +35,11 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm install
+      - name: Install dependencies
+        run: make setup
 
       - name: Build Windows executable
-        run: wails build -platform windows/amd64 -webview2 embed
+        run: make build-windows
 
       - name: Get version
         id: version
@@ -89,13 +87,11 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm install
+      - name: Install dependencies
+        run: make setup
 
       - name: Build macOS Universal
-        run: wails build -platform darwin/universal
+        run: make build-darwin-universal
 
       - name: Get version
         id: version
