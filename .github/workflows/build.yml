@@ -54,11 +54,10 @@ jobs:
           fi
 
       - name: Create Windows zip
-        shell: bash
+        shell: pwsh
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          cd build/bin
-          zip "vigilant-windows-amd64-${VERSION}.zip" vigilant.exe
+          $VERSION = "${{ steps.version.outputs.version }}"
+          Compress-Archive -Path "build/bin/vigilant.exe" -DestinationPath "build/bin/vigilant-windows-amd64-${VERSION}.zip"
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
