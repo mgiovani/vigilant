@@ -1,16 +1,14 @@
 <script>
   import { onMount } from 'svelte';
-  import { stats, focusState } from '../../stores/app';
+  import { stats } from '../../stores/app';
   import { Focus, AlertCircle, Crosshair, TrendingUp, Clock, Settings } from 'lucide-svelte';
-  import { createEventDispatcher } from 'svelte';
+  let { openSettings = () => {} } = $props();
 
-  const dispatch = createEventDispatcher();
-
-  let focusedTime = 0;
-  let distractedTime = 0;
-  let triggerCount = 0;
-  let focusRate = 0;
-  let sessionStartTime = new Date().toLocaleTimeString();
+  let focusedTime = $state(0);
+  let distractedTime = $state(0);
+  let triggerCount = $state(0);
+  let focusRate = $state(0);
+  let sessionStartTime = $state(new Date().toLocaleTimeString());
 
   onMount(() => {
     // Subscribe to stats updates
@@ -57,7 +55,7 @@
 <div class="relative bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
   <!-- Settings Button - Top Right -->
   <button
-    on:click={() => dispatch('openSettings')}
+    onclick={() => openSettings()}
     class="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-all rounded-lg hover:bg-white/10"
   >
     <Settings size={18} />

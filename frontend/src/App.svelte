@@ -44,7 +44,7 @@
 
   <!-- Stats Glass Panel - bottom overlay (raised to avoid YouTube controls) -->
   <div class="absolute bottom-20 left-6 right-6 z-30">
-    <StatsDisplay on:openSettings={() => (settingsPanelOpen = true)} />
+    <StatsDisplay openSettings={() => (settingsPanelOpen = true)} />
   </div>
 </main>
 
