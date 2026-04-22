@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { stats, focusState } from '../../stores/app';
+  import { stats } from '../../stores/app';
   import { Focus, AlertCircle, Crosshair, TrendingUp, Clock, Settings } from 'lucide-svelte';
   let { openSettings = () => {} } = $props();
 
